@@ -22,7 +22,6 @@ type DomainStat map[string]int
 
 func GetDomainStat(r io.Reader, domain string) (DomainStat, error) {
 	return getStat(r, domain)
-
 }
 
 func getStat(r io.Reader, domain string) (result DomainStat, err error) {
@@ -37,7 +36,6 @@ func getStat(r io.Reader, domain string) (result DomainStat, err error) {
 		if strings.Contains(user.Email, "."+domain) {
 			result[strings.ToLower(strings.SplitN(user.Email, "@", 2)[1])]++
 		}
-
 	}
 	if err = scanner.Err(); err != nil {
 		return
