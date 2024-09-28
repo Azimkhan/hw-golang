@@ -9,7 +9,11 @@ import (
 // при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
 type Config struct {
 	Logger LoggerConf
-	// TODO
+	HTTP   HTTPConf
+}
+
+type HTTPConf struct {
+	BindAddr string
 }
 
 type LoggerConf struct {

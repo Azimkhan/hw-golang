@@ -39,7 +39,7 @@ func main() {
 	}
 
 	storage := memorystorage.New()
-	calendar := app.New(logg, storage)
+	calendar := app.New(logg, storage, config.HTTP.BindAddr)
 
 	server := internalhttp.NewServer(logg, calendar)
 

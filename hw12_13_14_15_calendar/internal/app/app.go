@@ -2,25 +2,44 @@ package app
 
 import (
 	"context"
+	"time"
+
+	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage"
 )
 
-type App struct { // TODO
+type App struct {
+	storage  Storage
+	logger   Logger
+	bindAddr string
 }
 
-type Logger interface { // TODO
+type Logger interface {
+	Info(msg string)
+	Error(msg string)
 }
 
-type Storage interface { // TODO
+type Storage interface {
+	CreateEvent(ctx context.Context, event *storage.Event) error
+	UpdateEvent(event *storage.Event) error
+	RemoveEvent(eventID string) error
+	FilterEventsByDay(date time.Time) ([]*storage.Event, error)
+	FilterEventsByWeek(weekStart time.Time) ([]*storage.Event, error)
+	FilterEventsByMonth(monthStart time.Time) ([]*storage.Event, error)
 }
 
-func New(logger Logger, storage Storage) *App {
-	return &App{}
+func New(logger Logger, storage Storage, bindAddr string) *App {
+	return &App{
+		storage:  storage,
+		logger:   logger,
+		bindAddr: bindAddr,
+	}
 }
 
 func (a *App) CreateEvent(ctx context.Context, id, title string) error {
-	// TODO
-	return nil
-	// return a.storage.CreateEvent(storage.Event{ID: id, Title: title})
+	event := &storage.Event{ID: id, Title: title}
+	return a.storage.CreateEvent(ctx, event)
 }
 
-// TODO
+func (a *App) GetHTTPBindAddr() string {
+	return a.bindAddr
+}

@@ -1,5 +1,7 @@
 [logger]
 level = "INFO"
 
+[http]
+bindAddr = ":8081"
 # TODO
 # ...

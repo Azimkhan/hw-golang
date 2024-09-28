@@ -5,7 +5,11 @@ import (
 	"time"
 )
 
-var ErrEventNotFound = errors.New("event not found")
+var (
+	ErrEventNotFound = errors.New("event not found")
+	ErrAlreadyExists = errors.New("event already exists")
+	ErrEmptyID       = errors.New("empty event id")
+)
 
 type Event struct {
 	ID          string
@@ -14,13 +18,4 @@ type Event struct {
 	EndTime     time.Time
 	UserID      string
 	NotifyDelta int // in minutes
-}
-
-type EventStorage interface {
-	Add(event *Event) (*Event, error)
-	Update(event *Event) error
-	Remove(eventID string) error
-	FilterByDay(date time.Time) ([]*Event, error)
-	FilterByWeek(weekStart time.Time) ([]*Event, error)
-	FilterByMonth(monthStart time.Time) ([]*Event, error)
 }

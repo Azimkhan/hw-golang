@@ -1,26 +1,26 @@
 package memorystorage
 
 import (
+	"context"
 	"errors"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage"
 	"testing"
 	"time"
+
+	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage"
 )
 
-func TestAdd(t *testing.T) {
+func TestCreate(t *testing.T) {
 	s := New()
 	event := storage.Event{
+		ID:    "1",
 		Title: "test",
 	}
-	res, err := s.Add(&event)
+	err := s.CreateEvent(context.TODO(), &event)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	if res.ID != "1" {
-		t.Fatalf("unexpected event id: %v", event.ID)
-	}
-
 }
+
 func TestUpdate(t *testing.T) {
 	testData := []struct {
 		name  string
@@ -51,7 +51,7 @@ func TestUpdate(t *testing.T) {
 				ID:    "1",
 				Title: "test",
 			}})
-			err := s.Update(&tt.event)
+			err := s.UpdateEvent(&tt.event)
 			if !errors.Is(err, tt.err) {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -65,12 +65,12 @@ func TestRemove(t *testing.T) {
 		Title: "test",
 	}})
 
-	err := s.Remove("1")
+	err := s.RemoveEvent("1")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	err = s.Remove("1")
+	err = s.RemoveEvent("1")
 	if !errors.Is(err, storage.ErrEventNotFound) {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -95,7 +95,7 @@ func TestFilterByDay(t *testing.T) {
 		},
 	})
 
-	events, err := s.FilterByDay(time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC))
+	events, err := s.FilterEventsByDay(time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -127,7 +127,7 @@ func TestFilterByWeek(t *testing.T) {
 		},
 	})
 
-	events, err := s.FilterByWeek(time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC))
+	events, err := s.FilterEventsByWeek(time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -159,7 +159,7 @@ func TestFilterByMonth(t *testing.T) {
 		},
 	})
 
-	events, err := s.FilterByMonth(time.Date(2024, 10, 1, 0, 0, 0, 0, time.UTC))
+	events, err := s.FilterEventsByMonth(time.Date(2024, 10, 1, 0, 0, 0, 0, time.UTC))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

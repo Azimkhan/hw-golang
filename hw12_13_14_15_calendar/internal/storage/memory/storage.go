@@ -1,16 +1,16 @@
 package memorystorage
 
 import (
-	"strconv"
+	"context"
 	"sync"
 	"time"
+
+	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage"
 )
-import "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage"
 
 type Storage struct {
 	events map[string]*storage.Event
 	mu     sync.RWMutex
-	maxID  int
 }
 
 func New() *Storage {
@@ -29,19 +29,25 @@ func NewWithEvents(events []*storage.Event) *Storage {
 	}
 }
 
-func (s *Storage) Add(event *storage.Event) (*storage.Event, error) {
+func (s *Storage) CreateEvent(_ context.Context, event *storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
-
-	s.maxID++
-	event.ID = strconv.Itoa(s.maxID)
+	if event.ID == "" {
+		return storage.ErrEmptyID
+	}
+	if _, ok := s.events[event.ID]; ok {
+		return storage.ErrAlreadyExists
+	}
 	s.events[event.ID] = event
-	return event, nil
+	return nil
 }
 
-func (s *Storage) Update(event *storage.Event) error {
+func (s *Storage) UpdateEvent(event *storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
+	if event.ID == "" {
+		return storage.ErrEmptyID
+	}
 	if _, ok := s.events[event.ID]; !ok {
 		return storage.ErrEventNotFound
 	}
@@ -49,7 +55,7 @@ func (s *Storage) Update(event *storage.Event) error {
 	return nil
 }
 
-func (s *Storage) Remove(eventID string) error {
+func (s *Storage) RemoveEvent(eventID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.events[eventID]; !ok {
@@ -59,7 +65,7 @@ func (s *Storage) Remove(eventID string) error {
 	return nil
 }
 
-func (s *Storage) FilterByDay(date time.Time) ([]*storage.Event, error) {
+func (s *Storage) FilterEventsByDay(date time.Time) ([]*storage.Event, error) {
 	// iterrate over all events and filter by day
 	// go:
 	s.mu.RLock()
@@ -75,7 +81,7 @@ func (s *Storage) FilterByDay(date time.Time) ([]*storage.Event, error) {
 	return events, nil
 }
 
-func (s *Storage) FilterByWeek(weekStart time.Time) ([]*storage.Event, error) {
+func (s *Storage) FilterEventsByWeek(weekStart time.Time) ([]*storage.Event, error) {
 	// iterrate over all events and filter by week
 	// go:
 	s.mu.RLock()
@@ -93,7 +99,7 @@ func (s *Storage) FilterByWeek(weekStart time.Time) ([]*storage.Event, error) {
 	return events, nil
 }
 
-func (s *Storage) FilterByMonth(monthStart time.Time) ([]*storage.Event, error) {
+func (s *Storage) FilterEventsByMonth(monthStart time.Time) ([]*storage.Event, error) {
 	// iterrate over all events and filter by month
 	// go:
 	s.mu.RLock()

@@ -4,8 +4,12 @@ import (
 	"net/http"
 )
 
-func loggingMiddleware(next http.Handler) http.Handler { //nolint:unused
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// TODO
-	})
+type LoggingMiddleware struct {
+	logger Logger
+	next   http.Handler
+}
+
+func (l *LoggingMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	l.logger.Info("request")
+	l.next.ServeHTTP(w, r)
 }
