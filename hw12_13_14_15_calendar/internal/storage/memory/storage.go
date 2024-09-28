@@ -9,8 +9,8 @@ import "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage"
 
 type Storage struct {
 	events map[string]*storage.Event
-	mu     sync.RWMutex //nolint:unused
-	maxId  int
+	mu     sync.RWMutex
+	maxID  int
 }
 
 func New() *Storage {
@@ -33,8 +33,8 @@ func (s *Storage) Add(event *storage.Event) (*storage.Event, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.maxId++
-	event.ID = strconv.Itoa(s.maxId)
+	s.maxID++
+	event.ID = strconv.Itoa(s.maxID)
 	s.events[event.ID] = event
 	return event, nil
 }
