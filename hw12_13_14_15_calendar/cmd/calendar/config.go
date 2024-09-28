@@ -1,5 +1,9 @@
 package main
 
+import (
+	"github.com/BurntSushi/toml"
+)
+
 // При желании конфигурацию можно вынести в internal/config.
 // Организация конфига в main принуждает нас сужать API компонентов, использовать
 // при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
@@ -17,4 +21,7 @@ func NewConfig() Config {
 	return Config{}
 }
 
-// TODO
+func (c *Config) LoadFromFile(path string) error {
+	_, err := toml.DecodeFile(path, c)
+	return err
+}

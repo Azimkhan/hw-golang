@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"flag"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"
+	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/app"
+	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/Azimkhan/hw12_13_14_15_calendar/internal/server/http"
+	memorystorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/memory"
 )
 
 var configFile string
@@ -29,6 +30,9 @@ func main() {
 	}
 
 	config := NewConfig()
+	if err := config.LoadFromFile(configFile); err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
 	logg := logger.New(config.Logger.Level)
 
 	storage := memorystorage.New()
