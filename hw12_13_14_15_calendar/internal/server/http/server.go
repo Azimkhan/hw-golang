@@ -38,7 +38,7 @@ func (s *Server) Start(ctx context.Context) error {
 		Addr:              ":8081",
 		ReadHeaderTimeout: 5 * time.Second,
 		Handler:           &LoggingMiddleware{logger: s.logger, next: s.mux},
-		BaseContext: func(listener net.Listener) context.Context {
+		BaseContext: func(_ net.Listener) context.Context {
 			return ctx
 		},
 	}
