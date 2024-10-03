@@ -95,7 +95,10 @@ func TestFilterByDay(t *testing.T) {
 		},
 	})
 
-	events, err := s.FilterEventsByDay(context.TODO(), time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC))
+	events, err := s.FilterEventsByDay(
+		context.TODO(),
+		time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -127,7 +130,10 @@ func TestFilterByWeek(t *testing.T) {
 		},
 	})
 
-	events, err := s.FilterEventsByWeek(context.TODO(), time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC))
+	events, err := s.FilterEventsByWeek(
+		context.TODO(),
+		time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -159,7 +165,10 @@ func TestFilterByMonth(t *testing.T) {
 		},
 	})
 
-	events, err := s.FilterEventsByMonth(context.TODO(), time.Date(2024, 10, 1, 0, 0, 0, 0, time.UTC))
+	events, err := s.FilterEventsByMonth(
+		context.TODO(),
+		time.Date(2024, 10, 1, 0, 0, 0, 0, time.UTC),
+	)
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

@@ -102,7 +102,8 @@ func (s *Storage) FilterEventsByMonth(_ context.Context, monthStart time.Time) (
 	var events []*storage.Event
 
 	for _, event := range s.events {
-		if event.StartTime.Month() == monthStart.Month() && event.StartTime.Year() == monthStart.Year() {
+		if event.StartTime.Month() == monthStart.Month() &&
+			event.StartTime.Year() == monthStart.Year() {
 			events = append(events, event)
 		}
 	}

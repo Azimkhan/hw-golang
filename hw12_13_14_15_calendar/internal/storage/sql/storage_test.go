@@ -281,11 +281,13 @@ func createTestEvent(conn *pgx.Conn) (string, error) {
 	return uid, err
 }
 
-func insertEvent(conn *pgx.Conn, id string, title string, startTime time.Time, endTime time.Time, userId string, notifyDelta int) error {
+func insertEvent(
+	conn *pgx.Conn, id string, title string, startTime time.Time, endTime time.Time, userID string, notifyDelta int,
+) error {
 	_, err := conn.Exec(context.TODO(),
 		`INSERT INTO events (id, title, start_time, end_time, user_id, notify_delta) 
 VALUES ($1, $2, $3, $4, $5, $6)`,
-		id, title, startTime, endTime, userId, notifyDelta,
+		id, title, startTime, endTime, userID, notifyDelta,
 	)
 	return err
 }
