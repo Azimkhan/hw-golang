@@ -13,6 +13,7 @@ import (
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/Azimkhan/hw12_13_14_15_calendar/internal/server/http"
 	memorystorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string
@@ -38,7 +39,29 @@ func main() {
 		log.Fatalf("failed to create logger: %v", err)
 	}
 
-	storage := memorystorage.New()
+	var storage app.Storage
+	switch config.Storage.Type {
+	case "inmemory":
+		storage = memorystorage.New()
+	case "sql":
+		timeout, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancelFunc()
+		pgStorage := sqlstorage.New(config.Storage.DSN)
+		if err := pgStorage.Connect(timeout); err != nil {
+			logg.Error("failed to connect to db: " + err.Error())
+			os.Exit(1) //nolint:gocritic
+		}
+		defer func() {
+			timeout, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancelFunc()
+			if err := pgStorage.Close(timeout); err != nil {
+				logg.Error("failed to close connection to db: " + err.Error())
+			}
+		}()
+		storage = pgStorage
+	default:
+		panic("unknown storage type")
+	}
 	calendar := app.New(logg, storage, config.HTTP.BindAddr)
 
 	server := internalhttp.NewServer(logg, calendar)
@@ -63,6 +86,6 @@ func main() {
 	if err := server.Start(ctx); err != nil {
 		logg.Error("failed to start http server: " + err.Error())
 		cancel()
-		os.Exit(1) //nolint:gocritic
+		os.Exit(1)
 	}
 }

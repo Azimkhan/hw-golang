@@ -11,10 +11,19 @@ linters-settings:
   depguard:
     rules:
       main:
+        list-mode: strict
+        files:
+          - "cmd/**"
         allow:
           - $gostd
           - github.com/Azimkhan
           - github.com/BurntSushi/toml
+      tests:
+        files:
+          - $test
+        list-mode: lax
+        allow:
+          - "*"
 
 issues:
   exclude-rules:

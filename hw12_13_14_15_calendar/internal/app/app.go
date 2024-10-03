@@ -20,11 +20,11 @@ type Logger interface {
 
 type Storage interface {
 	CreateEvent(ctx context.Context, event *storage.Event) error
-	UpdateEvent(event *storage.Event) error
-	RemoveEvent(eventID string) error
-	FilterEventsByDay(date time.Time) ([]*storage.Event, error)
-	FilterEventsByWeek(weekStart time.Time) ([]*storage.Event, error)
-	FilterEventsByMonth(monthStart time.Time) ([]*storage.Event, error)
+	UpdateEvent(ctx context.Context, event *storage.Event) error
+	RemoveEvent(ctx context.Context, eventID string) error
+	FilterEventsByDay(ctx context.Context, date time.Time) ([]*storage.Event, error)
+	FilterEventsByWeek(ctx context.Context, weekStart time.Time) ([]*storage.Event, error)
+	FilterEventsByMonth(ctx context.Context, monthStart time.Time) ([]*storage.Event, error)
 }
 
 func New(logger Logger, storage Storage, bindAddr string) *App {

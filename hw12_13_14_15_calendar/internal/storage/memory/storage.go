@@ -42,7 +42,7 @@ func (s *Storage) CreateEvent(_ context.Context, event *storage.Event) error {
 	return nil
 }
 
-func (s *Storage) UpdateEvent(event *storage.Event) error {
+func (s *Storage) UpdateEvent(_ context.Context, event *storage.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if event.ID == "" {
@@ -55,7 +55,7 @@ func (s *Storage) UpdateEvent(event *storage.Event) error {
 	return nil
 }
 
-func (s *Storage) RemoveEvent(eventID string) error {
+func (s *Storage) RemoveEvent(_ context.Context, eventID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.events[eventID]; !ok {
@@ -65,9 +65,7 @@ func (s *Storage) RemoveEvent(eventID string) error {
 	return nil
 }
 
-func (s *Storage) FilterEventsByDay(date time.Time) ([]*storage.Event, error) {
-	// iterrate over all events and filter by day
-	// go:
+func (s *Storage) FilterEventsByDay(_ context.Context, date time.Time) ([]*storage.Event, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -81,9 +79,7 @@ func (s *Storage) FilterEventsByDay(date time.Time) ([]*storage.Event, error) {
 	return events, nil
 }
 
-func (s *Storage) FilterEventsByWeek(weekStart time.Time) ([]*storage.Event, error) {
-	// iterrate over all events and filter by week
-	// go:
+func (s *Storage) FilterEventsByWeek(_ context.Context, weekStart time.Time) ([]*storage.Event, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
@@ -99,9 +95,7 @@ func (s *Storage) FilterEventsByWeek(weekStart time.Time) ([]*storage.Event, err
 	return events, nil
 }
 
-func (s *Storage) FilterEventsByMonth(monthStart time.Time) ([]*storage.Event, error) {
-	// iterrate over all events and filter by month
-	// go:
+func (s *Storage) FilterEventsByMonth(_ context.Context, monthStart time.Time) ([]*storage.Event, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 

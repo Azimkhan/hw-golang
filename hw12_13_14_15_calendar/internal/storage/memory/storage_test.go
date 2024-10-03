@@ -51,7 +51,7 @@ func TestUpdate(t *testing.T) {
 				ID:    "1",
 				Title: "test",
 			}})
-			err := s.UpdateEvent(&tt.event)
+			err := s.UpdateEvent(context.TODO(), &tt.event)
 			if !errors.Is(err, tt.err) {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -65,12 +65,12 @@ func TestRemove(t *testing.T) {
 		Title: "test",
 	}})
 
-	err := s.RemoveEvent("1")
+	err := s.RemoveEvent(context.TODO(), "1")
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
 
-	err = s.RemoveEvent("1")
+	err = s.RemoveEvent(context.TODO(), "1")
 	if !errors.Is(err, storage.ErrEventNotFound) {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -95,7 +95,7 @@ func TestFilterByDay(t *testing.T) {
 		},
 	})
 
-	events, err := s.FilterEventsByDay(time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC))
+	events, err := s.FilterEventsByDay(context.TODO(), time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -127,7 +127,7 @@ func TestFilterByWeek(t *testing.T) {
 		},
 	})
 
-	events, err := s.FilterEventsByWeek(time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC))
+	events, err := s.FilterEventsByWeek(context.TODO(), time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
@@ -159,7 +159,7 @@ func TestFilterByMonth(t *testing.T) {
 		},
 	})
 
-	events, err := s.FilterEventsByMonth(time.Date(2024, 10, 1, 0, 0, 0, 0, time.UTC))
+	events, err := s.FilterEventsByMonth(context.TODO(), time.Date(2024, 10, 1, 0, 0, 0, 0, time.UTC))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
