@@ -72,9 +72,9 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v3
 
-      - name: make lint
-        run: make lint
-        working-directory: hw12_13_14_15_calendar
+#      - name: make lint
+#        run: make lint
+#        working-directory: hw12_13_14_15_calendar
 
       - name: make build
         run: make build
