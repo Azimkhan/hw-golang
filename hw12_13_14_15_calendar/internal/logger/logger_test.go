@@ -3,6 +3,8 @@ package logger
 import (
 	"os"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestLogger(t *testing.T) {
@@ -23,7 +25,7 @@ func TestLogger(t *testing.T) {
 		{
 			name:           "Log Info with level Info",
 			level:          Info,
-			expectedOutput: "Info message\n",
+			expectedOutput: "[INFO] Info message\n",
 			callFunc: func(logger *Logger) {
 				logger.Info("Info message")
 			},
@@ -43,9 +45,8 @@ func TestLogger(t *testing.T) {
 			w.Close()
 			output := make([]byte, 100)
 			n, _ := r.Read(output)
-			if string(output[:n]) != tt.expectedOutput {
-				t.Fatalf("unexpected output: %s", output[:n])
-			}
+			require.Contains(t, string(output[:n]), tt.expectedOutput)
+			require.Contains(t, string(output[:n]), tt.expectedOutput)
 		})
 	}
 }

@@ -1,6 +1,9 @@
 package logger
 
-import "fmt"
+import (
+	"fmt"
+	"time"
+)
 
 type LogLevel int
 
@@ -10,6 +13,8 @@ const (
 	Warn
 	Error
 )
+
+const logTemplate = "%s [%s] %s\n"
 
 func (l LogLevel) String() string {
 	switch l {
@@ -57,24 +62,28 @@ func New(level string) (*Logger, error) {
 
 func (l Logger) Debug(msg string) {
 	if l.level <= Debug {
-		fmt.Println(msg)
+		l.logf(Debug, msg)
 	}
 }
 
 func (l Logger) Info(msg string) {
 	if l.level <= Info {
-		fmt.Println(msg)
+		l.logf(Info, msg)
 	}
 }
 
 func (l Logger) Warn(msg string) {
 	if l.level <= Warn {
-		fmt.Println(msg)
+		l.logf(Warn, msg)
 	}
 }
 
 func (l Logger) Error(msg string) {
 	if l.level <= Error {
-		fmt.Println(msg)
+		l.logf(Error, msg)
 	}
+}
+
+func (l Logger) logf(level LogLevel, message string) {
+	fmt.Printf(logTemplate, time.Now().Format("2006-01-02 15:04:05.000"), level, message)
 }
