@@ -62,16 +62,16 @@ linters:
     - nestif
     - nilerr
     - noctx
-#    - nolintlint
-#    - prealloc
-#    - predeclared
-#    - revive
-#    - staticcheck
-#    - stylecheck
-#    - tagliatelle
-#    - thelper
-#    - typecheck
-#    - unconvert
-#    - unparam
-#    - unused
-#    - whitespace
+    - nolintlint
+    - prealloc
+    - predeclared
+    - revive
+    - staticcheck
+    - stylecheck
+    - tagliatelle
+    - thelper
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - whitespace
