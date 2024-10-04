@@ -55,8 +55,20 @@ func New(level string) (*Logger, error) {
 	}, nil
 }
 
+func (l Logger) Debug(msg string) {
+	if l.level <= Debug {
+		fmt.Println(msg)
+	}
+}
+
 func (l Logger) Info(msg string) {
 	if l.level <= Info {
+		fmt.Println(msg)
+	}
+}
+
+func (l Logger) Warn(msg string) {
+	if l.level <= Warn {
 		fmt.Println(msg)
 	}
 }
@@ -66,5 +78,3 @@ func (l Logger) Error(msg string) {
 		fmt.Println(msg)
 	}
 }
-
-// TODO

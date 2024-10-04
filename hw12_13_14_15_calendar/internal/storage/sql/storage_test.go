@@ -16,8 +16,6 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-const schemaVersionTable = "schema_version"
-
 func TestCreate(t *testing.T) {
 	ctx := context.Background()
 	connStr, err := createPostgresContainer(ctx, t)
@@ -314,7 +312,7 @@ func migrateDB(ctx context.Context, t *testing.T, conn *pgx.Conn) error {
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	err = migrator.LoadMigrations(os.DirFS("../../../migrations"))
+	err = migrator.LoadMigrations(os.DirFS("../../../assets/migrations"))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

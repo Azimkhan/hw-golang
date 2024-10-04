@@ -4,7 +4,6 @@ import (
 	"context"
 	"flag"
 	"log"
-	"os"
 	"os/signal"
 	"syscall"
 	"time"
@@ -25,7 +24,8 @@ func init() {
 func main() {
 	flag.Parse()
 
-	if flag.Arg(0) == "version" {
+	arg0 := flag.Arg(0)
+	if arg0 == "version" {
 		printVersion()
 		return
 	}
@@ -49,7 +49,17 @@ func main() {
 		pgStorage := sqlstorage.New(config.Storage.DSN)
 		if err := pgStorage.Connect(timeout); err != nil {
 			logg.Error("failed to connect to db: " + err.Error())
-			os.Exit(1) //nolint:gocritic
+			return
+		}
+		if arg0 == "migrate" {
+			logg.Info("Running migrations...")
+			err := sqlstorage.MigrateDB(context.Background(), logg, pgStorage)
+			if err != nil {
+				logg.Error("failed to migrate db: " + err.Error())
+				return
+			}
+			logg.Info("Migrations completed successfully")
+			return
 		}
 		defer func() {
 			timeout, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
@@ -86,6 +96,5 @@ func main() {
 	if err := server.Start(ctx); err != nil {
 		logg.Error("failed to start http server: " + err.Error())
 		cancel()
-		os.Exit(1)
 	}
 }
