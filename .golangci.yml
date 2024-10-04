@@ -13,8 +13,7 @@ linters-settings:
       main:
         allow:
           - $gostd
-          - github.com/Azimkhan
-          - github.com/BurntSushi/toml
+          - github.com/stretchr/testify/require
 
 issues:
   exclude-rules:

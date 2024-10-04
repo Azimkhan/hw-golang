@@ -16,7 +16,8 @@ linters-settings:
           - "cmd/**"
         allow:
           - $gostd
-          - github.com/stretchr/testify/require
+          - github.com/Azimkhan
+          - github.com/BurntSushi/toml
 
 issues:
   exclude-rules:
