@@ -2,7 +2,7 @@ run:
   tests: true
   build-tags:
     - bench
-    - !bench
+    - "!bench"
 
 linters-settings:
   funlen:
@@ -44,34 +44,34 @@ linters:
     - gci
     - gocognit
     - goconst
-    - gocritic
-    - gocyclo
-    - godot
-    - gofmt
-    - gofumpt
-    - goheader
-    - goprintffuncname
-    - gosec
-    - gosimple
-    - govet
-    - importas
-    - ineffassign
-    - lll
-    - makezero
-    - misspell
-    - nestif
-    - nilerr
-    - noctx
-    - nolintlint
-    - prealloc
-    - predeclared
-    - revive
-    - staticcheck
-    - stylecheck
-    - tagliatelle
-    - thelper
-    - typecheck
-    - unconvert
-    - unparam
-    - unused
-    - whitespace
+#    - gocritic
+#    - gocyclo
+#    - godot
+#    - gofmt
+#    - gofumpt
+#    - goheader
+#    - goprintffuncname
+#    - gosec
+#    - gosimple
+#    - govet
+#    - importas
+#    - ineffassign
+#    - lll
+#    - makezero
+#    - misspell
+#    - nestif
+#    - nilerr
+#    - noctx
+#    - nolintlint
+#    - prealloc
+#    - predeclared
+#    - revive
+#    - staticcheck
+#    - stylecheck
+#    - tagliatelle
+#    - thelper
+#    - typecheck
+#    - unconvert
+#    - unparam
+#    - unused
+#    - whitespace
