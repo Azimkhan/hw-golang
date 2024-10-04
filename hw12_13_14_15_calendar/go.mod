@@ -2,8 +2,6 @@ module github.com/Azimkhan/hw12_13_14_15_calendar
 
 go 1.22.0
 
-toolchain go1.23.2
-
 require (
 	github.com/BurntSushi/toml v1.4.0
 	github.com/google/uuid v1.6.0
