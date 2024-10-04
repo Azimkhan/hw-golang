@@ -44,24 +44,24 @@ linters:
     - gci
     - gocognit
     - goconst
-#    - gocritic
-#    - gocyclo
-#    - godot
-#    - gofmt
-#    - gofumpt
-#    - goheader
-#    - goprintffuncname
-#    - gosec
-#    - gosimple
-#    - govet
-#    - importas
-#    - ineffassign
-#    - lll
-#    - makezero
-#    - misspell
-#    - nestif
-#    - nilerr
-#    - noctx
+    - gocritic
+    - gocyclo
+    - godot
+    - gofmt
+    - gofumpt
+    - goheader
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - importas
+    - ineffassign
+    - lll
+    - makezero
+    - misspell
+    - nestif
+    - nilerr
+    - noctx
 #    - nolintlint
 #    - prealloc
 #    - predeclared
