@@ -1,5 +1,9 @@
 [logger]
 level = "INFO"
 
-# TODO
-# ...
+[http]
+bindAddr = ":8081"
+
+[storage]
+type = "sql"
+dsn = "postgres://calendar:calendar@localhost:35432/calendar?sslmode=disable"

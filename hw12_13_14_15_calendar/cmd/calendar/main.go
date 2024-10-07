@@ -3,15 +3,16 @@ package main
 import (
 	"context"
 	"flag"
-	"os"
+	"log"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/app"
-	"github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/fixme_my_friend/hw12_13_14_15_calendar/internal/storage/memory"
+	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/app"
+	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/Azimkhan/hw12_13_14_15_calendar/internal/server/http"
+	memorystorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/memory"
+	sqlstorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string
@@ -23,16 +24,55 @@ func init() {
 func main() {
 	flag.Parse()
 
-	if flag.Arg(0) == "version" {
+	arg0 := flag.Arg(0)
+	if arg0 == "version" {
 		printVersion()
 		return
 	}
 
 	config := NewConfig()
-	logg := logger.New(config.Logger.Level)
+	if err := config.LoadFromFile(configFile); err != nil {
+		log.Fatalf("failed to load config: %v", err)
+	}
+	logg, err := logger.New(config.Logger.Level)
+	if err != nil {
+		log.Fatalf("failed to create logger: %v", err)
+	}
 
-	storage := memorystorage.New()
-	calendar := app.New(logg, storage)
+	var storage app.Storage
+	switch config.Storage.Type {
+	case "inmemory":
+		storage = memorystorage.New()
+	case "sql":
+		timeout, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancelFunc()
+		pgStorage := sqlstorage.New(config.Storage.DSN)
+		if err := pgStorage.Connect(timeout); err != nil {
+			logg.Error("failed to connect to db: " + err.Error())
+			return
+		}
+		if arg0 == "migrate" {
+			logg.Info("Running migrations...")
+			err := sqlstorage.MigrateDB(context.Background(), logg, pgStorage)
+			if err != nil {
+				logg.Error("failed to migrate db: " + err.Error())
+				return
+			}
+			logg.Info("Migrations completed successfully")
+			return
+		}
+		defer func() {
+			timeout, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
+			defer cancelFunc()
+			if err := pgStorage.Close(timeout); err != nil {
+				logg.Error("failed to close connection to db: " + err.Error())
+			}
+		}()
+		storage = pgStorage
+	default:
+		panic("unknown storage type")
+	}
+	calendar := app.New(logg, storage, config.HTTP.BindAddr)
 
 	server := internalhttp.NewServer(logg, calendar)
 
@@ -56,6 +96,5 @@ func main() {
 	if err := server.Start(ctx); err != nil {
 		logg.Error("failed to start http server: " + err.Error())
 		cancel()
-		os.Exit(1) //nolint:gocritic
 	}
 }
