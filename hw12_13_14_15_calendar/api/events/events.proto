@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+option go_package = "./;pb";
+package api.events.v1;
+import "google/protobuf/timestamp.proto";
+import "google/api/annotations.proto";
+
+message Event {
+  string id = 1;
+  string title = 2;
+  google.protobuf.Timestamp start = 3;
+  google.protobuf.Timestamp end = 4;
+  string userId = 5;
+  uint32 notifyDelta = 6;
+}
+
+
+service EventService {
+  rpc CreateEvent (CreateEventRequest) returns (CreateEventResponse) {
+    option (google.api.http) = {
+      post: "/events"
+      body: "*"
+    };
+  }
+  rpc UpdateEvent (UpdateEventRequest) returns (UpdateEventResponse) {
+    option (google.api.http) = {
+      put: "/events"
+      body: "*"
+    };
+  }
+  rpc RemoveEvent (RemoveEventRequest) returns (RemoveEventResponse) {
+    option (google.api.http) = {
+      delete: "/events/{id}"
+    };
+  }
+  rpc FilterEventsByDay (FilterEventsByDayRequest) returns (FilterEventsByDayResponse) {
+    option (google.api.http) = {
+      get: "/events/date/{date}"
+    };
+  }
+  rpc FilterEventsByWeek (FilterEventsByWeekRequest) returns (FilterEventsByWeekResponse) {
+    option (google.api.http) = {
+      get: "/events/week/{date}"
+    };
+  }
+  rpc FilterEventsByMonth (FilterEventsByMonthRequest) returns (FilterEventsByMonthResponse) {
+    option (google.api.http) = {
+      get: "/events/month/{date}"
+    };
+  }
+}
+
+message CreateEventRequest {
+  Event event = 1;
+}
+
+message CreateEventResponse {
+  Event event = 1;
+}
+
+message UpdateEventRequest {
+  Event event = 1;
+}
+
+message UpdateEventResponse {
+  Event event = 1;
+}
+
+message RemoveEventRequest {
+  string id = 1;
+}
+
+message RemoveEventResponse {
+}
+
+message FilterEventsByDayRequest {
+  google.protobuf.Timestamp date = 1;
+}
+
+message FilterEventsByDayResponse {
+  repeated Event events = 1;
+}
+
+message FilterEventsByWeekRequest {
+  google.protobuf.Timestamp date = 1;
+}
+
+message FilterEventsByWeekResponse {
+  repeated Event events = 1;
+}
+
+message FilterEventsByMonthRequest {
+  google.protobuf.Timestamp date = 1;
+}
+
+message FilterEventsByMonthResponse {
+  repeated Event events = 1;
+}
+

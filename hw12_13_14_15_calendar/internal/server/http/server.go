@@ -2,6 +2,7 @@ package internalhttp
 
 import (
 	"context"
+	"errors"
 	"net"
 	"net/http"
 	"time"
@@ -23,8 +24,10 @@ type Application interface {
 	GetHTTPBindAddr() string
 }
 
-func NewServer(logger Logger, app Application) *Server {
+func NewServer(logger Logger, gRPCHandler http.HandlerFunc, app Application) *Server {
 	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", gRPCHandler)
 	mux.HandleFunc("/hello", HelloHandler)
 	return &Server{
 		logger: logger,
@@ -42,12 +45,14 @@ func (s *Server) Start(ctx context.Context) error {
 			return ctx
 		},
 	}
-	return s.httpServer.ListenAndServe()
+	err := s.httpServer.ListenAndServe()
+	if err != nil && !errors.Is(err, http.ErrServerClosed) {
+		return err
+	}
+	return nil
 }
 
 func (s *Server) Stop(ctx context.Context) error {
 	err := s.httpServer.Shutdown(ctx)
 	return err
 }
-
-// TODO

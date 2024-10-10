@@ -8,9 +8,9 @@ import (
 )
 
 type App struct {
-	storage  Storage
-	logger   Logger
-	bindAddr string
+	Storage  Storage
+	Logger   Logger
+	BindAddr string
 }
 
 type Logger interface {
@@ -29,17 +29,17 @@ type Storage interface {
 
 func New(logger Logger, storage Storage, bindAddr string) *App {
 	return &App{
-		storage:  storage,
-		logger:   logger,
-		bindAddr: bindAddr,
+		Storage:  storage,
+		Logger:   logger,
+		BindAddr: bindAddr,
 	}
 }
 
 func (a *App) CreateEvent(ctx context.Context, id, title string) error {
 	event := &storage.Event{ID: id, Title: title}
-	return a.storage.CreateEvent(ctx, event)
+	return a.Storage.CreateEvent(ctx, event)
 }
 
 func (a *App) GetHTTPBindAddr() string {
-	return a.bindAddr
+	return a.BindAddr
 }
