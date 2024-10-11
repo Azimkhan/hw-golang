@@ -3,16 +3,15 @@ package storage
 import (
 	"context"
 	"errors"
+	"time"
+
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/conf"
 	memorystorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/memory"
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/model"
 	sqlstorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/sql"
-	"time"
 )
 
-var (
-	ErrUnknownStorageType = errors.New("unknown storage type")
-)
+var ErrUnknownStorageType = errors.New("unknown storage type")
 
 type Storage interface {
 	CreateEvent(ctx context.Context, event *model.Event) error

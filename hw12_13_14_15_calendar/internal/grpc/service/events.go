@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"errors"
+
 	"github.com/Azimkhan/hw12_13_14_15_calendar/gen/events/pb"
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/app"
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/model"
@@ -18,7 +19,9 @@ func NewEventsService(app *app.App) *EventsService {
 	return &EventsService{app: app}
 }
 
-func (s *EventsService) CreateEvent(ctx context.Context, r *pb.CreateEventRequest) (*pb.CreateEventResponse, error) {
+func (s *EventsService) CreateEvent(ctx context.Context, r *pb.CreateEventRequest) (
+	*pb.CreateEventResponse, error,
+) {
 	event := s.grpcToInternal(r.Event)
 	if err := s.app.Storage.CreateEvent(ctx, event); err != nil {
 		return nil, err
@@ -26,10 +29,11 @@ func (s *EventsService) CreateEvent(ctx context.Context, r *pb.CreateEventReques
 	return &pb.CreateEventResponse{
 		Event: s.internalToGrpc(event),
 	}, nil
-
 }
 
-func (s *EventsService) UpdateEvent(ctx context.Context, r *pb.UpdateEventRequest) (*pb.UpdateEventResponse, error) {
+func (s *EventsService) UpdateEvent(ctx context.Context, r *pb.UpdateEventRequest) (
+	*pb.UpdateEventResponse, error,
+) {
 	event := s.grpcToInternal(r.Event)
 	if err := s.app.Storage.UpdateEvent(ctx, event); err != nil {
 		return nil, err
@@ -39,14 +43,18 @@ func (s *EventsService) UpdateEvent(ctx context.Context, r *pb.UpdateEventReques
 	}, nil
 }
 
-func (s *EventsService) RemoveEvent(ctx context.Context, r *pb.RemoveEventRequest) (*pb.RemoveEventResponse, error) {
+func (s *EventsService) RemoveEvent(ctx context.Context, r *pb.RemoveEventRequest) (
+	*pb.RemoveEventResponse, error,
+) {
 	if err := s.app.Storage.RemoveEvent(ctx, r.GetId()); err != nil {
 		return nil, err
 	}
 	return &pb.RemoveEventResponse{}, nil
 }
 
-func (s *EventsService) FilterEventsByDay(ctx context.Context, r *pb.FilterEventsByDayRequest) (*pb.FilterEventsByDayResponse, error) {
+func (s *EventsService) FilterEventsByDay(ctx context.Context, r *pb.FilterEventsByDayRequest) (
+	*pb.FilterEventsByDayResponse, error,
+) {
 	if r.GetDate() == nil {
 		return nil, errors.New("date is not specified")
 	}
@@ -59,7 +67,9 @@ func (s *EventsService) FilterEventsByDay(ctx context.Context, r *pb.FilterEvent
 	}, nil
 }
 
-func (s *EventsService) FilterEventsByWeek(ctx context.Context, r *pb.FilterEventsByWeekRequest) (*pb.FilterEventsByWeekResponse, error) {
+func (s *EventsService) FilterEventsByWeek(ctx context.Context, r *pb.FilterEventsByWeekRequest) (
+	*pb.FilterEventsByWeekResponse, error,
+) {
 	if r.GetDate() == nil {
 		return nil, errors.New("date is not specified")
 	}
@@ -72,7 +82,9 @@ func (s *EventsService) FilterEventsByWeek(ctx context.Context, r *pb.FilterEven
 	}, nil
 }
 
-func (s *EventsService) FilterEventsByMonth(ctx context.Context, r *pb.FilterEventsByMonthRequest) (*pb.FilterEventsByMonthResponse, error) {
+func (s *EventsService) FilterEventsByMonth(ctx context.Context, r *pb.FilterEventsByMonthRequest) (
+	*pb.FilterEventsByMonthResponse, error,
+) {
 	if r.GetDate() == nil {
 		return nil, errors.New("date is not specified")
 	}

@@ -3,9 +3,10 @@ package memorystorage
 import (
 	"context"
 	"errors"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/model"
 	"testing"
 	"time"
+
+	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/model"
 )
 
 func TestCreate(t *testing.T) {

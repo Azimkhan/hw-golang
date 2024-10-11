@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/conf"
-	sqlstorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/sql"
 	"log"
 	"time"
+
+	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/conf"
+	sqlstorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string
@@ -40,16 +41,18 @@ func migrate(config *conf.Config) {
 		}
 	}()
 	if err := s.Connect(ctx); err != nil {
-		log.Fatal("failed to connect: " + err.Error())
+		log.Printf("failed to connect to storage: %s\n", err)
+		return
 	}
-	migrationCallback := func(version int32, name, direction, sql string) {
+	migrationCallback := func(_ int32, name, direction, sql string) {
 		log.Printf(
 			"%s executing %s %s\n%s\n\n", time.Now().Format("2006-01-02 15:04:05"), name, direction, sql,
 		)
 	}
 
 	if err := s.Migrate(ctx, migrationCallback); err != nil {
-		log.Fatal("failed to migrate: " + err.Error())
+		log.Printf("failed to migrate: %s\n", err)
+		return
 	}
 	log.Println("Migration finished")
 }

@@ -1,6 +1,12 @@
 package service
 
 import (
+	"context"
+	"log"
+	"net"
+	"testing"
+	"time"
+
 	"github.com/Azimkhan/hw12_13_14_15_calendar/gen/events/pb"
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/app"
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/logger"
@@ -15,20 +21,15 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/test/bufconn"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"log"
-	"net"
-	"testing"
-	"time"
-)
-
-import (
-	"context"
 )
 
 const (
-	selectCountStatement = "SELECT count(*) FROM events WHERE id = $1"
-	selectStatement      = "SELECT id, title, start_time, end_time, user_id, notify_delta FROM events WHERE id = $1"
-	insertStatement      = "INSERT INTO events (id, title, start_time, end_time, user_id, notify_delta) VALUES ($1, $2, $3, $4, $5, $6)"
+	selectCountStatement = "SELECT count(*) FROM events WHERE" +
+		" id = $1"
+	selectStatement = "SELECT id, title, start_time, end_time, user_id, notify_delta " +
+		"FROM events WHERE id = $1"
+	insertStatement = "INSERT INTO events (id, title, start_time, end_time, user_id, notify_delta) " +
+		"VALUES ($1, $2, $3, $4, $5, $6)"
 )
 
 func checkEvent(t *testing.T, event *pb.Event, row pgx.Row) {
@@ -54,9 +55,9 @@ func TestCreate(t *testing.T) {
 
 	client := testServer(ctx, t, testApp)
 
-	eventId := uuid.NewString()
+	eventID := uuid.NewString()
 	event := &pb.Event{
-		Id:          eventId,
+		Id:          eventID,
 		Title:       "Kickoff meeting",
 		Start:       timestamppb.New(time.Now()),
 		End:         timestamppb.New(time.Now().Add(time.Hour)),
@@ -70,7 +71,7 @@ func TestCreate(t *testing.T) {
 
 	row := pgStorage.Conn.QueryRow(context.TODO(),
 		selectStatement,
-		eventId,
+		eventID,
 	)
 
 	checkEvent(t, event, row)
@@ -80,17 +81,17 @@ func TestUpdate(t *testing.T) {
 	ctx := context.Background()
 	testApp, pgStorage := createApp(ctx, t)
 
-	eventId := uuid.NewString()
+	eventID := uuid.NewString()
 	_, err := pgStorage.Conn.Exec(context.TODO(),
 		insertStatement,
-		eventId, "Kickoff meeting", time.Now(), time.Now().Add(time.Hour), uuid.NewString(), 10,
+		eventID, "Kickoff meeting", time.Now(), time.Now().Add(time.Hour), uuid.NewString(), 10,
 	)
 
 	require.NoError(t, err)
 	client := testServer(ctx, t, testApp)
 
 	event := &pb.Event{
-		Id:          eventId,
+		Id:          eventID,
 		Title:       "Kickoff meeting 2",
 		Start:       timestamppb.New(time.Now()),
 		End:         timestamppb.New(time.Now().Add(time.Hour)),
@@ -104,7 +105,7 @@ func TestUpdate(t *testing.T) {
 
 	row := pgStorage.Conn.QueryRow(context.TODO(),
 		selectStatement,
-		eventId,
+		eventID,
 	)
 
 	checkEvent(t, event, row)
@@ -114,23 +115,23 @@ func TestRemove(t *testing.T) {
 	ctx := context.Background()
 	testApp, pgStorage := createApp(ctx, t)
 
-	eventId := uuid.NewString()
+	eventID := uuid.NewString()
 	_, err := pgStorage.Conn.Exec(context.TODO(),
 		insertStatement,
-		eventId, "Kickoff meeting", time.Now(), time.Now().Add(time.Hour), uuid.NewString(), 10,
+		eventID, "Kickoff meeting", time.Now(), time.Now().Add(time.Hour), uuid.NewString(), 10,
 	)
 
 	require.NoError(t, err)
 	client := testServer(ctx, t, testApp)
 
-	response, err := client.RemoveEvent(context.Background(), &pb.RemoveEventRequest{Id: eventId})
+	response, err := client.RemoveEvent(context.Background(), &pb.RemoveEventRequest{Id: eventID})
 
 	require.NoError(t, err)
 	require.NotNil(t, response)
 
 	row := pgStorage.Conn.QueryRow(context.TODO(),
 		selectCountStatement,
-		eventId,
+		eventID,
 	)
 	count := 1
 	err = row.Scan(&count)
@@ -146,7 +147,10 @@ func TestFilterEventsByDay(t *testing.T) {
 	events, date := sqlstorage.FilterEventsByDateFixture()
 	sqlstorage.InsertEvents(t, events, pgStorage)
 
-	response, err := client.FilterEventsByDay(context.Background(), &pb.FilterEventsByDayRequest{Date: timestamppb.New(date)})
+	response, err := client.FilterEventsByDay(
+		context.Background(),
+		&pb.FilterEventsByDayRequest{Date: timestamppb.New(date)},
+	)
 
 	require.NoError(t, err)
 	require.NotNil(t, response)
@@ -161,7 +165,10 @@ func TestFilterEventsByWeek(t *testing.T) {
 	events, weekStart := sqlstorage.FilterEventsByWeekFixture()
 	sqlstorage.InsertEvents(t, events, pgStorage)
 
-	response, err := client.FilterEventsByWeek(context.Background(), &pb.FilterEventsByWeekRequest{Date: timestamppb.New(weekStart)})
+	response, err := client.FilterEventsByWeek(
+		context.Background(),
+		&pb.FilterEventsByWeekRequest{Date: timestamppb.New(weekStart)},
+	)
 
 	require.NoError(t, err)
 	require.NotNil(t, response)
@@ -176,7 +183,10 @@ func TestFilterEventsByMonth(t *testing.T) {
 	events, monthStart := sqlstorage.FilterEventsByMonthFixture()
 	sqlstorage.InsertEvents(t, events, pgStorage)
 
-	response, err := client.FilterEventsByMonth(context.Background(), &pb.FilterEventsByMonthRequest{Date: timestamppb.New(monthStart)})
+	response, err := client.FilterEventsByMonth(
+		context.Background(),
+		&pb.FilterEventsByMonthRequest{Date: timestamppb.New(monthStart)},
+	)
 
 	require.NoError(t, err)
 	require.NotNil(t, response)
@@ -210,7 +220,7 @@ func createApp(ctx context.Context, t *testing.T) (*app.App, *sqlstorage.Storage
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}
-	//return connStr, err
+	// return connStr, err
 	pgStorage := sqlstorage.New(connStr)
 	err = pgStorage.Connect(ctx)
 	t.Cleanup(func() {
@@ -243,9 +253,11 @@ func testServer(_ context.Context, t *testing.T, testApp *app.App) pb.EventServi
 		}
 		baseServer.Stop()
 	})
-	conn, err := grpc.NewClient("passthrough://bufnet", grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {
-		return lis.Dial()
-	}), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(
+		"passthrough://bufnet",
+		grpc.WithContextDialer(func(context.Context, string) (net.Conn, error) {
+			return lis.Dial()
+		}), grpc.WithTransportCredentials(insecure.NewCredentials()))
 	require.NoError(t, err)
 	client := pb.NewEventServiceClient(conn)
 	return client

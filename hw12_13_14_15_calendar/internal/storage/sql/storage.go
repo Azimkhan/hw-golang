@@ -2,9 +2,9 @@ package sqlstorage
 
 import (
 	"context"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/model"
 	"time"
 
+	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/model"
 	"github.com/jackc/pgx/v5"
 )
 

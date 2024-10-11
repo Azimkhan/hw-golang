@@ -2,6 +2,9 @@ package sqlstorage
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/model"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
@@ -9,8 +12,6 @@ import (
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/postgres"
 	"github.com/testcontainers/testcontainers-go/wait"
-	"testing"
-	"time"
 )
 
 func TestCreate(t *testing.T) {

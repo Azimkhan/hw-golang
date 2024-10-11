@@ -22,8 +22,7 @@ type Logger interface {
 	Error(msg string)
 }
 
-type Application interface {
-}
+type Application interface{}
 
 func NewServer(logger Logger, gRPCHandler http.HandlerFunc, app Application, bindAddr string) *Server {
 	mux := http.NewServeMux()

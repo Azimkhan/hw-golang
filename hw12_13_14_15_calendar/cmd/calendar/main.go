@@ -4,16 +4,16 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/conf"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage"
 	"os/signal"
 	"syscall"
 	"time"
 
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/app"
+	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/conf"
 	appGrpc "github.com/Azimkhan/hw12_13_14_15_calendar/internal/grpc"
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/Azimkhan/hw12_13_14_15_calendar/internal/server/http"
+	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage"
 )
 
 var configFile string
@@ -109,5 +109,4 @@ func main() {
 		logg.Error("failed to start http server: " + err.Error())
 		cancel()
 	}
-
 }

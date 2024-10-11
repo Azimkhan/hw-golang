@@ -3,6 +3,8 @@ package grpc
 import (
 	"context"
 	"fmt"
+	"net"
+
 	"github.com/Azimkhan/hw12_13_14_15_calendar/gen/events/pb"
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/app"
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/conf"
@@ -10,7 +12,6 @@ import (
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"net"
 )
 
 type Server struct {

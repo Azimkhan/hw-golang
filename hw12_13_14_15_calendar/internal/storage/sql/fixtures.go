@@ -2,16 +2,17 @@ package sqlstorage
 
 import (
 	"context"
+	"testing"
+	"time"
+
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/model"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"
-	"testing"
-	"time"
 )
 
-// FilterEventsByDateFixture returns a slice of three events two of which are on the same day, and one is on the next day.
-// The second return value is the date of the first event.
+// FilterEventsByDateFixture returns a slice of three events two of which are on the same day,
+// and one is on the next day. The second return value is the date of the first event.
 func FilterEventsByDateFixture() ([]*model.Event, time.Time) {
 	date := time.Date(2024, 10, 1, 13, 0, 0, 0, time.Local)
 	return []*model.Event{
@@ -42,8 +43,8 @@ func FilterEventsByDateFixture() ([]*model.Event, time.Time) {
 	}, date
 }
 
-// FilterEventsByWeekFixture returns a slice of three events two of which are on the same week, and one is on the next week.
-// The second return value is the date of the week start.
+// FilterEventsByWeekFixture returns a slice of three events two of which are on the same week,
+// and one is on the next week. The second return value is the date of the week start.
 func FilterEventsByWeekFixture() ([]*model.Event, time.Time) {
 	date := time.Date(2024, 9, 30, 0, 0, 0, 0, time.Local)
 	return []*model.Event{
@@ -74,30 +75,30 @@ func FilterEventsByWeekFixture() ([]*model.Event, time.Time) {
 	}, date
 }
 
-// FilterEventsByMonthFixture returns a slice of three events two of which are on the same month, and one is on the next month.
-// The second return value is the date of the month start.
+// FilterEventsByMonthFixture returns a slice of three events two of which are on the same month,
+// and one is on the next month. The second return value is the date of the month start.
 func FilterEventsByMonthFixture() ([]*model.Event, time.Time) {
 	date := time.Date(2024, 10, 1, 0, 0, 0, 0, time.Local)
 	return []*model.Event{
 		{
 			ID:          uuid.NewString(),
-			Title:       "Kickoff meeting",
-			StartTime:   time.Date(2024, 10, 4, 0, 0, 0, 0, time.Local),
-			EndTime:     time.Date(2024, 10, 4, 1, 0, 0, 0, time.Local),
+			Title:       "IT Conference",
+			StartTime:   time.Date(2024, 10, 11, 0, 0, 0, 0, time.Local),
+			EndTime:     time.Date(2024, 10, 11, 1, 0, 0, 0, time.Local),
 			UserID:      uuid.NewString(),
 			NotifyDelta: 10,
 		},
 		{
 			ID:          uuid.NewString(),
-			Title:       "Kickoff meeting 2",
-			StartTime:   time.Date(2024, 10, 5, 0, 0, 0, 0, time.Local),
-			EndTime:     time.Date(2024, 10, 5, 1, 0, 0, 0, time.Local),
+			Title:       "IT Conference 2",
+			StartTime:   time.Date(2024, 10, 12, 0, 0, 0, 0, time.Local),
+			EndTime:     time.Date(2024, 10, 12, 1, 0, 0, 0, time.Local),
 			UserID:      uuid.NewString(),
 			NotifyDelta: 20,
 		},
 		{
 			ID:          uuid.NewString(),
-			Title:       "Kickoff meeting 3",
+			Title:       "IT Conference 3",
 			StartTime:   time.Date(2024, 11, 7, 0, 0, 0, 0, time.Local),
 			EndTime:     time.Date(2024, 11, 7, 1, 0, 0, 0, time.Local),
 			UserID:      uuid.NewString(),
