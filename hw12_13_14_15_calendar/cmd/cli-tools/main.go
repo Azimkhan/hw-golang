@@ -6,8 +6,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/conf"
-	sqlstorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/sql"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/conf"
+	sqlstorage "github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string

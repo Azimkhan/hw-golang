@@ -5,10 +5,10 @@ import (
 	"errors"
 	"time"
 
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/conf"
-	memorystorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/memory"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/model"
-	sqlstorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/sql"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/conf"
+	memorystorage "github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage/memory"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage/model"
+	sqlstorage "github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var ErrUnknownStorageType = errors.New("unknown storage type")

@@ -8,12 +8,12 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/app"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/conf"
-	appGrpc "github.com/Azimkhan/hw12_13_14_15_calendar/internal/grpc"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/Azimkhan/hw12_13_14_15_calendar/internal/server/http"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/app"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/conf"
+	appGrpc "github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/grpc"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/server/http"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage"
 )
 
 var configFile string

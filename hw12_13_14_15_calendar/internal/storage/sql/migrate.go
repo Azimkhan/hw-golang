@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io/fs"
 
-	"github.com/Azimkhan/hw12_13_14_15_calendar/assets"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/assets"
 	"github.com/jackc/tern/v2/migrate"
 )
 

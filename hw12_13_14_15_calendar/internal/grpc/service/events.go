@@ -4,9 +4,9 @@ import (
 	"context"
 	"errors"
 
-	"github.com/Azimkhan/hw12_13_14_15_calendar/gen/events/pb"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/app"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/model"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/gen/events/pb"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/app"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage/model"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 

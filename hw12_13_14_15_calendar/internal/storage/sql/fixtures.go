@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/model"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage/model"
 	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/stretchr/testify/require"

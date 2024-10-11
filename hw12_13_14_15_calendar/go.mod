@@ -1,4 +1,4 @@
-module github.com/Azimkhan/hw12_13_14_15_calendar
+module github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar
 
 go 1.22.0
 

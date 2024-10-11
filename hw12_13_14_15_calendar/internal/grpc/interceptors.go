@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/app"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/app"
 	"google.golang.org/grpc"
 )
 
