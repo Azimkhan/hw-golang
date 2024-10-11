@@ -32,6 +32,7 @@ const (
 )
 
 func checkEvent(t *testing.T, event *pb.Event, row pgx.Row) {
+	t.Helper()
 	var id, title, userID string
 	var startTime, endTime time.Time
 	var notifyDelta int
@@ -185,6 +186,7 @@ func TestFilterEventsByMonth(t *testing.T) {
 func createApp(ctx context.Context, t *testing.T) (*app.App, *sqlstorage.Storage) {
 	t.Helper()
 	logg, err := logger.New("DEBUG")
+	require.NoError(t, err, "failed to create logger")
 	pgContainer, err := postgres.Run(ctx,
 		"postgres:16",
 		// postgres.WithInitScripts(filepath.Join("..", "testdata", "init-db.sql")),
@@ -217,9 +219,9 @@ func createApp(ctx context.Context, t *testing.T) (*app.App, *sqlstorage.Storage
 		}
 	})
 	require.NoError(t, err, "failed to connect to db")
-	err = sqlstorage.MigrateDB(ctx, pgStorage, nil)
+	err = pgStorage.Migrate(ctx, nil)
 	require.NoError(t, err, "migration failed")
-	testApp := app.New(logg, pgStorage, "localhost:8080")
+	testApp := app.New(logg, pgStorage)
 	return testApp, pgStorage
 }
 

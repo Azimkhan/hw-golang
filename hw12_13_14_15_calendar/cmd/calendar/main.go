@@ -60,7 +60,7 @@ func main() {
 	}
 
 	// create app
-	calendar := app.New(logg, s, config.HTTP.BindAddr)
+	calendar := app.New(logg, s)
 
 	// create context
 	ctx, cancel := signal.NotifyContext(context.Background(),
@@ -76,7 +76,6 @@ func main() {
 
 	// run gRPC server
 	go func() {
-		logg.Info("gRPC server is running...")
 		if err := grpcServer.Serve(); err != nil {
 			logg.Error("failed to start gRPC server: " + err.Error())
 			return
@@ -90,7 +89,7 @@ func main() {
 		return
 	}
 
-	httpServer := internalhttp.NewServer(logg, gwmux.ServeHTTP, calendar)
+	httpServer := internalhttp.NewServer(logg, gwmux.ServeHTTP, calendar, config.HTTP.BindAddr)
 
 	// signal handling
 	go func() {
@@ -106,8 +105,6 @@ func main() {
 		}
 	}()
 
-	// run http server on main goroutine
-	logg.Info("calendar is running...")
 	if err := httpServer.Start(ctx); err != nil {
 		logg.Error("failed to start http server: " + err.Error())
 		cancel()

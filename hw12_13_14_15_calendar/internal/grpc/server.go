@@ -2,6 +2,7 @@ package grpc
 
 import (
 	"context"
+	"fmt"
 	"github.com/Azimkhan/hw12_13_14_15_calendar/gen/events/pb"
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/app"
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/conf"
@@ -16,9 +17,11 @@ type Server struct {
 	grpcServer    *grpc.Server
 	lsn           net.Listener
 	eventsService *service.EventsService
+	logger        app.Logger
 }
 
 func (s *Server) Serve() error {
+	s.logger.Info(fmt.Sprintf("gRPC server is running on %s", s.lsn.Addr().String()))
 	return s.grpcServer.Serve(s.lsn)
 }
 
@@ -26,14 +29,15 @@ func (s *Server) Stop() {
 	s.grpcServer.Stop()
 }
 
-func (s *Server) CreateGatewayMux(ctx context.Context) (*grpc.Server, error) {
+func (s *Server) CreateGatewayMux(ctx context.Context) (*runtime.ServeMux, error) {
 	gwmux := runtime.NewServeMux()
 	err := pb.RegisterEventServiceHandlerServer(ctx, gwmux, s.eventsService)
 	if err != nil {
 		return nil, err
 	}
-	return s.grpcServer, nil
+	return gwmux, nil
 }
+
 func NewServer(calendar *app.App, conf *conf.GRPCConf) (*Server, error) {
 	eventsService := service.NewEventsService(calendar)
 
@@ -54,5 +58,6 @@ func NewServer(calendar *app.App, conf *conf.GRPCConf) (*Server, error) {
 		grpcServer:    grpcServer,
 		lsn:           lsn,
 		eventsService: eventsService,
+		logger:        calendar.Logger,
 	}, nil
 }

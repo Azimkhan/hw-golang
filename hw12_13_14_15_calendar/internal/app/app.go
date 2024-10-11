@@ -17,19 +17,14 @@ type Logger interface {
 	Error(msg string)
 }
 
-func New(logger Logger, storage storage.Storage, bindAddr string) *App {
+func New(logger Logger, storage storage.Storage) *App {
 	return &App{
-		Storage:  storage,
-		Logger:   logger,
-		BindAddr: bindAddr,
+		Storage: storage,
+		Logger:  logger,
 	}
 }
 
 func (a *App) CreateEvent(ctx context.Context, id, title string) error {
 	event := &model.Event{ID: id, Title: title}
 	return a.Storage.CreateEvent(ctx, event)
-}
-
-func (a *App) GetHTTPBindAddr() string {
-	return a.BindAddr
 }

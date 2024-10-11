@@ -209,7 +209,7 @@ func verifyEvent(t *testing.T, row pgx.Row, event model.Event) {
 
 func migrateDB(ctx context.Context, t *testing.T, s *Storage) {
 	t.Helper()
-	err := MigrateDB(ctx, s, nil)
+	err := s.Migrate(ctx, nil)
 	require.NoError(t, err)
 }
 

@@ -10,8 +10,8 @@ import (
 
 const schemaVersionTable = "schema_version"
 
-func MigrateDB(ctx context.Context, storage *Storage, callBack func(_ int32, name, direction, sql string)) error {
-	migrator, err := migrate.NewMigrator(ctx, storage.Conn, schemaVersionTable)
+func (s *Storage) Migrate(ctx context.Context, callBack func(_ int32, name, direction, sql string)) error {
+	migrator, err := migrate.NewMigrator(ctx, s.Conn, schemaVersionTable)
 	if err != nil {
 		return fmt.Errorf("failed to create migrator: %w", err)
 	}

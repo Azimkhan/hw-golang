@@ -8,6 +8,12 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+func New(dsn string) *Storage {
+	return &Storage{
+		dsn: dsn,
+	}
+}
+
 type Storage struct {
 	dsn  string
 	Conn *pgx.Conn
@@ -119,12 +125,6 @@ func (s *Storage) fetchRows(rows pgx.Rows) ([]*model.Event, error) {
 	}
 
 	return events, nil
-}
-
-func New(dsn string) *Storage {
-	return &Storage{
-		dsn: dsn,
-	}
 }
 
 func (s *Storage) Connect(ctx context.Context) error {
