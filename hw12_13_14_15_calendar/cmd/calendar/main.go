@@ -3,14 +3,9 @@ package main
 import (
 	"context"
 	"flag"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/gen/events/pb"
+	"fmt"
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/conf"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/grpc/service"
-	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/reflection"
-	"log"
-	"net"
+	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage"
 	"os/signal"
 	"syscall"
 	"time"
@@ -19,8 +14,6 @@ import (
 	appGrpc "github.com/Azimkhan/hw12_13_14_15_calendar/internal/grpc"
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/logger"
 	internalhttp "github.com/Azimkhan/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/memory"
-	sqlstorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/sql"
 )
 
 var configFile string
@@ -32,90 +25,74 @@ func init() {
 func main() {
 	flag.Parse()
 
-	arg0 := flag.Arg(0)
-	if arg0 == "version" {
+	if flag.Arg(0) == "version" {
 		printVersion()
 		return
 	}
-
+	// load config
 	config := conf.NewConfig()
 	if err := config.LoadFromFile(configFile); err != nil {
-		log.Fatalf("failed to load config: %v", err)
-	}
-	logg, err := logger.New(config.Logger.Level)
-	if err != nil {
-		log.Fatalf("failed to create logger: %v", err)
+		fmt.Println("failed to load config: " + err.Error())
+		return
 	}
 
-	var storage app.Storage
-	switch config.Storage.Type {
-	case "inmemory":
-		storage = memorystorage.New()
-	case "sql":
-		timeout, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancelFunc()
-		pgStorage := sqlstorage.New(config.Storage.DSN)
-		if err := pgStorage.Connect(timeout); err != nil {
-			logg.Error("failed to connect to db: " + err.Error())
-			return
-		}
-		if arg0 == "migrate" {
-			logg.Info("Running migrations...")
-			err := sqlstorage.MigrateDB(context.Background(), logg, pgStorage)
-			if err != nil {
-				logg.Error("failed to migrate db: " + err.Error())
-				return
-			}
-			logg.Info("Migrations completed successfully")
-			return
-		}
+	// create logger
+	logg, err := logger.New(config.Logger.Level)
+	if err != nil {
+		fmt.Println("failed to create logger: " + err.Error())
+		return
+	}
+
+	// create storage
+	s, closeFunc, err := storage.NewFromConfig(&config.Storage)
+	if err != nil {
+		logg.Error("failed to create storage: " + err.Error())
+		return
+	}
+	if closeFunc != nil {
 		defer func() {
 			timeout, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancelFunc()
-			if err := pgStorage.Close(timeout); err != nil {
-				logg.Error("failed to close connection to db: " + err.Error())
+			if err := closeFunc(timeout); err != nil {
+				logg.Error("failed to close storage: " + err.Error())
 			}
 		}()
-		storage = pgStorage
-	default:
-		panic("unknown storage type")
 	}
-	calendar := app.New(logg, storage, config.HTTP.BindAddr)
 
+	// create app
+	calendar := app.New(logg, s, config.HTTP.BindAddr)
+
+	// create context
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
-	eventsService := service.NewEventsService(calendar)
-
-	// gRPC server
-	lsn, err := net.Listen("tcp", ":50051")
+	// create gRPC server
+	grpcServer, err := appGrpc.NewServer(calendar, &config.GRPC)
 	if err != nil {
-		log.Fatal(err)
+		logg.Error("failed to create gRPC server: " + err.Error())
+		return
 	}
-	grpcServer := grpc.NewServer(
-		grpc.ChainUnaryInterceptor(
-			appGrpc.UnaryLoggingInterceptor(logg),
-		),
-	)
-	pb.RegisterEventServiceServer(grpcServer, eventsService)
-	reflection.Register(grpcServer)
 
+	// run gRPC server
 	go func() {
 		logg.Info("gRPC server is running...")
-		if err := grpcServer.Serve(lsn); err != nil {
-			panic(err)
+		if err := grpcServer.Serve(); err != nil {
+			logg.Error("failed to start gRPC server: " + err.Error())
+			return
 		}
 	}()
 
-	gwmux := runtime.NewServeMux()
-	err = pb.RegisterEventServiceHandlerServer(ctx, gwmux, eventsService)
+	// create http server
+	gwmux, err := grpcServer.CreateGatewayMux(ctx)
 	if err != nil {
-		log.Fatal(err)
+		logg.Error("failed to register gateway: " + err.Error())
+		return
 	}
 
-	// http server
 	httpServer := internalhttp.NewServer(logg, gwmux.ServeHTTP, calendar)
+
+	// signal handling
 	go func() {
 		<-ctx.Done()
 
@@ -123,12 +100,13 @@ func main() {
 		defer cancel()
 
 		logg.Info("Signal received, stopping servers...")
-		grpcServer.GracefulStop()
+		grpcServer.Stop()
 		if err := httpServer.Stop(ctx); err != nil {
 			logg.Error("failed to stop http server: " + err.Error())
 		}
 	}()
 
+	// run http server on main goroutine
 	logg.Info("calendar is running...")
 	if err := httpServer.Start(ctx); err != nil {
 		logg.Error("failed to start http server: " + err.Error())

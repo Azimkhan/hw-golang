@@ -5,7 +5,7 @@ import (
 	"errors"
 	"github.com/Azimkhan/hw12_13_14_15_calendar/gen/events/pb"
 	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/app"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage"
+	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/model"
 	"google.golang.org/protobuf/types/known/timestamppb"
 )
 
@@ -85,7 +85,7 @@ func (s *EventsService) FilterEventsByMonth(ctx context.Context, r *pb.FilterEve
 	}, nil
 }
 
-func (s *EventsService) internalSliceToGrpc(events []*storage.Event) []*pb.Event {
+func (s *EventsService) internalSliceToGrpc(events []*model.Event) []*pb.Event {
 	res := make([]*pb.Event, len(events))
 	for i, e := range events {
 		res[i] = s.internalToGrpc(e)
@@ -93,8 +93,8 @@ func (s *EventsService) internalSliceToGrpc(events []*storage.Event) []*pb.Event
 	return res
 }
 
-func (s *EventsService) grpcToInternal(g *pb.Event) *storage.Event {
-	return &storage.Event{
+func (s *EventsService) grpcToInternal(g *pb.Event) *model.Event {
+	return &model.Event{
 		ID:          g.GetId(),
 		Title:       g.GetTitle(),
 		StartTime:   g.GetStart().AsTime(),
@@ -104,7 +104,7 @@ func (s *EventsService) grpcToInternal(g *pb.Event) *storage.Event {
 	}
 }
 
-func (s *EventsService) internalToGrpc(e *storage.Event) *pb.Event {
+func (s *EventsService) internalToGrpc(e *model.Event) *pb.Event {
 	return &pb.Event{
 		Id:          e.ID,
 		Title:       e.Title,

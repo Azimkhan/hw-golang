@@ -3,18 +3,15 @@ package sqlstorage
 import (
 	"context"
 	"fmt"
-	"io/fs"
-	"time"
-
 	"github.com/Azimkhan/hw12_13_14_15_calendar/assets"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/logger"
 	"github.com/jackc/tern/v2/migrate"
+	"io/fs"
 )
 
 const schemaVersionTable = "schema_version"
 
-func MigrateDB(ctx context.Context, logg *logger.Logger, storage *Storage) error {
-	migrator, err := migrate.NewMigrator(ctx, storage.conn, schemaVersionTable)
+func MigrateDB(ctx context.Context, storage *Storage, callBack func(_ int32, name, direction, sql string)) error {
+	migrator, err := migrate.NewMigrator(ctx, storage.Conn, schemaVersionTable)
 	if err != nil {
 		return fmt.Errorf("failed to create migrator: %w", err)
 	}
@@ -26,12 +23,7 @@ func MigrateDB(ctx context.Context, logg *logger.Logger, storage *Storage) error
 	if err != nil {
 		return fmt.Errorf("failed to load migrations: %w", err)
 	}
-	migrator.OnStart = func(_ int32, name, direction, sql string) {
-		logg.Info(
-			fmt.Sprintf(
-				"%s executing %s %s\n%s\n\n", time.Now().Format("2006-01-02 15:04:05"), name, direction, sql),
-		)
-	}
+	migrator.OnStart = callBack
 	err = migrator.Migrate(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to migrate: %w", err)
