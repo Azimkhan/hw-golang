@@ -113,6 +113,9 @@ FROM events WHERE start_time >= $1 AND start_time <= $2`,
 }
 
 func (s *Storage) fetchRows(rows pgx.Rows) ([]*model.Event, error) {
+	if rows.Err() != nil {
+		return nil, rows.Err()
+	}
 	events := make([]*model.Event, 0)
 	var err error
 	for rows.Next() {
