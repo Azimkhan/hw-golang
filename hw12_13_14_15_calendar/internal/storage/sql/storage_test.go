@@ -14,6 +14,13 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
+const (
+	testDBName     = "test-db"
+	testDBUser     = "postgres"
+	testDBPassword = "postgres"
+	testDBImage    = "postgres:16"
+)
+
 func TestCreate(t *testing.T) {
 	ctx := context.Background()
 	connStr, err := createPostgresContainer(ctx, t)
@@ -217,11 +224,10 @@ func migrateDB(ctx context.Context, t *testing.T, s *Storage) {
 func createPostgresContainer(ctx context.Context, t *testing.T) (string, error) {
 	t.Helper()
 	pgContainer, err := postgres.Run(ctx,
-		"postgres:16",
-		// postgres.WithInitScripts(filepath.Join("..", "testdata", "init-db.sql")),
-		postgres.WithDatabase("test-db"),
-		postgres.WithUsername("postgres"),
-		postgres.WithPassword("postgres"),
+		testDBImage,
+		postgres.WithDatabase(testDBName),
+		postgres.WithUsername(testDBUser),
+		postgres.WithPassword(testDBPassword),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
 				WithOccurrence(2).WithStartupTimeout(5*time.Second)),

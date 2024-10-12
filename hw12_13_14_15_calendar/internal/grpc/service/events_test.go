@@ -32,6 +32,13 @@ const (
 		"VALUES ($1, $2, $3, $4, $5, $6)"
 )
 
+const (
+	testDBName     = "test-db"
+	testDBUser     = "postgres"
+	testDBPassword = "postgres"
+	testDBImage    = "postgres:16"
+)
+
 func checkEvent(t *testing.T, event *pb.Event, row pgx.Row) {
 	t.Helper()
 	var id, title, userID string
@@ -198,11 +205,10 @@ func createApp(ctx context.Context, t *testing.T) (*app.App, *sqlstorage.Storage
 	logg, err := logger.New("DEBUG")
 	require.NoError(t, err, "failed to create logger")
 	pgContainer, err := postgres.Run(ctx,
-		"postgres:16",
-		// postgres.WithInitScripts(filepath.Join("..", "testdata", "init-db.sql")),
-		postgres.WithDatabase("test-db"),
-		postgres.WithUsername("postgres"),
-		postgres.WithPassword("postgres"),
+		testDBImage,
+		postgres.WithDatabase(testDBName),
+		postgres.WithUsername(testDBUser),
+		postgres.WithPassword(testDBPassword),
 		testcontainers.WithWaitStrategy(
 			wait.ForLog("database system is ready to accept connections").
 				WithOccurrence(2).WithStartupTimeout(5*time.Second)),

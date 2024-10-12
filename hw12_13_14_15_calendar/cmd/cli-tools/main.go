@@ -29,10 +29,10 @@ func main() {
 }
 
 func migrate(config *conf.Config) {
-	log.Println("Migration started")
 	if config.Storage.Type != "sql" {
 		log.Fatal("migrate is only supported for sql storage")
 	}
+	log.Println("Migration started")
 	ctx := context.Background()
 	s := sqlstorage.New(config.Storage.DSN)
 	defer func() {
