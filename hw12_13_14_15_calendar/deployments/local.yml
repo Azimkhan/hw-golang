@@ -8,10 +8,22 @@ services:
             POSTGRES_DB: calendar
 
         healthcheck:
-            test: ["CMD-SHELL", "pg_isready -U calendar -d alendar"]
+            test: ["CMD-SHELL", "pg_isready -U calendar -d calendar"]
             interval: 2s
             timeout: 5s
             retries: 10
 
         ports:
             - "35432:5432"
+
+    rabbitmq:
+        image: rabbitmq:3-management
+        healthcheck:
+            test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+            interval: 2s
+            timeout: 5s
+            retries: 10
+
+        ports:
+            - "35672:5672"
+            - "35673:15672"

@@ -1,0 +1,14 @@
+scanInterval = 30
+
+[logger]
+level = "INFO"
+
+[storage]
+type = "sql"
+dsn = "postgres://calendar:calendar@localhost:35432/calendar?sslmode=disable"
+
+[amqp]
+uri = "amqp://guest:guest@localhost:35672/"
+exchange = "calendar"
+exchangeType = "direct"
+routingKey = "notifications"

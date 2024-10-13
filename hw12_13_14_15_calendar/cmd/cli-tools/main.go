@@ -28,7 +28,7 @@ func main() {
 	}
 }
 
-func migrate(config *conf.Config) {
+func migrate(config *conf.APIConfig) {
 	if config.Storage.Type != "sql" {
 		log.Fatal("migrate is only supported for sql storage")
 	}
