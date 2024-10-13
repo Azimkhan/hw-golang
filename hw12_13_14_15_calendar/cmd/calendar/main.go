@@ -3,16 +3,17 @@ package main
 import (
 	"context"
 	"flag"
-	"log"
+	"fmt"
 	"os/signal"
 	"syscall"
 	"time"
 
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/app"
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/logger"
-	internalhttp "github.com/Azimkhan/hw12_13_14_15_calendar/internal/server/http"
-	memorystorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/memory"
-	sqlstorage "github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage/sql"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/app"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/conf"
+	appGrpc "github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/grpc"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/logger"
+	internalhttp "github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/server/http"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage"
 )
 
 var configFile string
@@ -24,76 +25,87 @@ func init() {
 func main() {
 	flag.Parse()
 
-	arg0 := flag.Arg(0)
-	if arg0 == "version" {
+	if flag.Arg(0) == "version" {
 		printVersion()
 		return
 	}
-
-	config := NewConfig()
+	// load config
+	config := conf.NewConfig()
 	if err := config.LoadFromFile(configFile); err != nil {
-		log.Fatalf("failed to load config: %v", err)
+		fmt.Println("failed to load config: " + err.Error())
+		return
 	}
+
+	// create logger
 	logg, err := logger.New(config.Logger.Level)
 	if err != nil {
-		log.Fatalf("failed to create logger: %v", err)
+		fmt.Println("failed to create logger: " + err.Error())
+		return
 	}
 
-	var storage app.Storage
-	switch config.Storage.Type {
-	case "inmemory":
-		storage = memorystorage.New()
-	case "sql":
-		timeout, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
-		defer cancelFunc()
-		pgStorage := sqlstorage.New(config.Storage.DSN)
-		if err := pgStorage.Connect(timeout); err != nil {
-			logg.Error("failed to connect to db: " + err.Error())
-			return
-		}
-		if arg0 == "migrate" {
-			logg.Info("Running migrations...")
-			err := sqlstorage.MigrateDB(context.Background(), logg, pgStorage)
-			if err != nil {
-				logg.Error("failed to migrate db: " + err.Error())
-				return
-			}
-			logg.Info("Migrations completed successfully")
-			return
-		}
+	// create storage
+	s, closeFunc, err := storage.NewFromConfig(&config.Storage)
+	if err != nil {
+		logg.Error("failed to create storage: " + err.Error())
+		return
+	}
+	if closeFunc != nil {
 		defer func() {
 			timeout, cancelFunc := context.WithTimeout(context.Background(), 10*time.Second)
 			defer cancelFunc()
-			if err := pgStorage.Close(timeout); err != nil {
-				logg.Error("failed to close connection to db: " + err.Error())
+			if err := closeFunc(timeout); err != nil {
+				logg.Error("failed to close storage: " + err.Error())
 			}
 		}()
-		storage = pgStorage
-	default:
-		panic("unknown storage type")
 	}
-	calendar := app.New(logg, storage, config.HTTP.BindAddr)
 
-	server := internalhttp.NewServer(logg, calendar)
+	// create app
+	calendar := app.New(logg, s)
 
+	// create context
 	ctx, cancel := signal.NotifyContext(context.Background(),
 		syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP)
 	defer cancel()
 
+	// create gRPC server
+	grpcServer, err := appGrpc.NewServer(calendar, &config.GRPC)
+	if err != nil {
+		logg.Error("failed to create gRPC server: " + err.Error())
+		return
+	}
+
+	// run gRPC server
+	go func() {
+		if err := grpcServer.Serve(); err != nil {
+			logg.Error("failed to start gRPC server: " + err.Error())
+			return
+		}
+	}()
+
+	// create http server
+	gwmux, err := grpcServer.CreateGatewayMux(ctx)
+	if err != nil {
+		logg.Error("failed to register gateway: " + err.Error())
+		return
+	}
+
+	httpServer := internalhttp.NewServer(logg, gwmux.ServeHTTP, calendar, config.HTTP.BindAddr)
+
+	// signal handling
 	go func() {
 		<-ctx.Done()
 
 		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 		defer cancel()
 
-		if err := server.Stop(ctx); err != nil {
+		logg.Info("Signal received, stopping servers...")
+		grpcServer.Stop()
+		if err := httpServer.Stop(ctx); err != nil {
 			logg.Error("failed to stop http server: " + err.Error())
 		}
 	}()
 
-	logg.Info("calendar is running...")
-
-	if err := server.Start(ctx); err != nil {
+	if err := httpServer.Start(ctx); err != nil {
 		logg.Error("failed to start http server: " + err.Error())
 		cancel()
 	}

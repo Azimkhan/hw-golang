@@ -5,22 +5,22 @@ import (
 	"sync"
 	"time"
 
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage/model"
 )
 
 type Storage struct {
-	events map[string]*storage.Event
+	events map[string]*model.Event
 	mu     sync.RWMutex
 }
 
 func New() *Storage {
 	return &Storage{
-		events: make(map[string]*storage.Event),
+		events: make(map[string]*model.Event),
 	}
 }
 
-func NewWithEvents(events []*storage.Event) *Storage {
-	eventsMap := make(map[string]*storage.Event)
+func NewWithEvents(events []*model.Event) *Storage {
+	eventsMap := make(map[string]*model.Event)
 	for _, event := range events {
 		eventsMap[event.ID] = event
 	}
@@ -29,27 +29,27 @@ func NewWithEvents(events []*storage.Event) *Storage {
 	}
 }
 
-func (s *Storage) CreateEvent(_ context.Context, event *storage.Event) error {
+func (s *Storage) CreateEvent(_ context.Context, event *model.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if event.ID == "" {
-		return storage.ErrEmptyID
+		return model.ErrEmptyID
 	}
 	if _, ok := s.events[event.ID]; ok {
-		return storage.ErrAlreadyExists
+		return model.ErrAlreadyExists
 	}
 	s.events[event.ID] = event
 	return nil
 }
 
-func (s *Storage) UpdateEvent(_ context.Context, event *storage.Event) error {
+func (s *Storage) UpdateEvent(_ context.Context, event *model.Event) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if event.ID == "" {
-		return storage.ErrEmptyID
+		return model.ErrEmptyID
 	}
 	if _, ok := s.events[event.ID]; !ok {
-		return storage.ErrEventNotFound
+		return model.ErrEventNotFound
 	}
 	s.events[event.ID] = event
 	return nil
@@ -59,17 +59,17 @@ func (s *Storage) RemoveEvent(_ context.Context, eventID string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if _, ok := s.events[eventID]; !ok {
-		return storage.ErrEventNotFound
+		return model.ErrEventNotFound
 	}
 	delete(s.events, eventID)
 	return nil
 }
 
-func (s *Storage) FilterEventsByDay(_ context.Context, date time.Time) ([]*storage.Event, error) {
+func (s *Storage) FilterEventsByDay(_ context.Context, date time.Time) ([]*model.Event, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	var events []*storage.Event
+	var events []*model.Event
 
 	for _, event := range s.events {
 		if event.StartTime.Day() == date.Day() {
@@ -79,11 +79,11 @@ func (s *Storage) FilterEventsByDay(_ context.Context, date time.Time) ([]*stora
 	return events, nil
 }
 
-func (s *Storage) FilterEventsByWeek(_ context.Context, weekStart time.Time) ([]*storage.Event, error) {
+func (s *Storage) FilterEventsByWeek(_ context.Context, weekStart time.Time) ([]*model.Event, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	var events []*storage.Event
+	var events []*model.Event
 
 	for _, event := range s.events {
 		year0, w0 := event.StartTime.ISOWeek()
@@ -95,11 +95,11 @@ func (s *Storage) FilterEventsByWeek(_ context.Context, weekStart time.Time) ([]
 	return events, nil
 }
 
-func (s *Storage) FilterEventsByMonth(_ context.Context, monthStart time.Time) ([]*storage.Event, error) {
+func (s *Storage) FilterEventsByMonth(_ context.Context, monthStart time.Time) ([]*model.Event, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 
-	var events []*storage.Event
+	var events []*model.Event
 
 	for _, event := range s.events {
 		if event.StartTime.Month() == monthStart.Month() &&

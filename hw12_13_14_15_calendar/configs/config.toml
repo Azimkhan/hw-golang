@@ -1,6 +1,9 @@
 [logger]
 level = "INFO"
 
+[grpc]
+bindAddr = ":50051"
+
 [http]
 bindAddr = ":8081"
 

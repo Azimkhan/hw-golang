@@ -34,4 +34,12 @@ lint: install-lint-deps
 migrate: build
 	$(BIN) migrate
 
+generate:
+	protoc \
+		--proto_path=api \
+		--go_out=gen/events/pb \
+		--go-grpc_out=gen/events/pb \
+		--grpc-gateway_out=gen/events/pb \
+		api/events/*.proto
+
 .PHONY: build run build-img run-img version test lint

@@ -6,12 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/Azimkhan/hw12_13_14_15_calendar/internal/storage"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage/model"
 )
 
 func TestCreate(t *testing.T) {
 	s := New()
-	event := storage.Event{
+	event := model.Event{
 		ID:    "1",
 		Title: "test",
 	}
@@ -24,20 +24,20 @@ func TestCreate(t *testing.T) {
 func TestUpdate(t *testing.T) {
 	testData := []struct {
 		name  string
-		event storage.Event
+		event model.Event
 		err   error
 	}{
 		{
 			name: "event not found",
-			event: storage.Event{
+			event: model.Event{
 				ID:    "2",
 				Title: "test",
 			},
-			err: storage.ErrEventNotFound,
+			err: model.ErrEventNotFound,
 		},
 		{
 			name: "event found",
-			event: storage.Event{
+			event: model.Event{
 				ID:    "1",
 				Title: "test 2",
 			},
@@ -47,7 +47,7 @@ func TestUpdate(t *testing.T) {
 
 	for _, tt := range testData {
 		t.Run(tt.name, func(t *testing.T) {
-			s := NewWithEvents([]*storage.Event{{
+			s := NewWithEvents([]*model.Event{{
 				ID:    "1",
 				Title: "test",
 			}})
@@ -60,7 +60,7 @@ func TestUpdate(t *testing.T) {
 }
 
 func TestRemove(t *testing.T) {
-	s := NewWithEvents([]*storage.Event{{
+	s := NewWithEvents([]*model.Event{{
 		ID:    "1",
 		Title: "test",
 	}})
@@ -71,13 +71,13 @@ func TestRemove(t *testing.T) {
 	}
 
 	err = s.RemoveEvent(context.TODO(), "1")
-	if !errors.Is(err, storage.ErrEventNotFound) {
+	if !errors.Is(err, model.ErrEventNotFound) {
 		t.Fatalf("unexpected error: %v", err)
 	}
 }
 
 func TestFilterByDay(t *testing.T) {
-	s := NewWithEvents([]*storage.Event{
+	s := NewWithEvents([]*model.Event{
 		{
 			ID:        "1",
 			Title:     "test",
@@ -108,7 +108,7 @@ func TestFilterByDay(t *testing.T) {
 }
 
 func TestFilterByWeek(t *testing.T) {
-	s := NewWithEvents([]*storage.Event{
+	s := NewWithEvents([]*model.Event{
 		// week 1
 		{
 			ID:        "1",
@@ -143,7 +143,7 @@ func TestFilterByWeek(t *testing.T) {
 }
 
 func TestFilterByMonth(t *testing.T) {
-	s := NewWithEvents([]*storage.Event{
+	s := NewWithEvents([]*model.Event{
 		// month 1
 		{
 			ID:        "1",

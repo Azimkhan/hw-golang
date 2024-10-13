@@ -23,11 +23,11 @@ func (w *responseWriter) WriteHeader(code int) {
 
 func (l *LoggingMiddleware) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	start := time.Now()
-	rw := &responseWriter{w, 0}
+	rw := &responseWriter{w, http.StatusOK}
 	l.next.ServeHTTP(rw, r)
 	latency := time.Since(start)
 	msg := fmt.Sprintf(
-		"%s %s %d %s (%s, User agent: %s, IP: %s)",
+		"[http] %s %s %d %s (%s, User agent: %s, IP: %s)",
 		r.Method, r.URL.Path, rw.status, latency, r.Proto, r.UserAgent(), r.RemoteAddr,
 	)
 	l.logger.Info(msg)

@@ -1,4 +1,4 @@
-package main
+package conf
 
 import (
 	"github.com/BurntSushi/toml"
@@ -10,12 +10,17 @@ import (
 type Config struct {
 	Logger  LoggerConf
 	HTTP    HTTPConf
+	GRPC    GRPCConf
 	Storage StorageConf
 }
 
 type StorageConf struct {
 	DSN  string
 	Type string // sql, inmemory
+}
+
+type GRPCConf struct {
+	BindAddr string
 }
 
 type HTTPConf struct {
