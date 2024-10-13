@@ -6,6 +6,10 @@ LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%d
 
 build:
 	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
+	go build -v -o $(BIN)_scheduler -ldflags "$(LDFLAGS)" ./cmd/scheduler
+	go build -v -o $(BIN)_sender -ldflags "$(LDFLAGS)" ./cmd/sender
+	go build -v -o $(BIN)_tools -ldflags "$(LDFLAGS)" ./cmd/cli-tools
+
 
 run: build
 	$(BIN) -config ./configs/config.toml

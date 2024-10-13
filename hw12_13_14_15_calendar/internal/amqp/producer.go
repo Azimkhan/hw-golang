@@ -3,6 +3,7 @@ package amqp
 import (
 	"encoding/json"
 	"fmt"
+
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/conf"
 	"github.com/streadway/amqp"
 )
@@ -48,10 +49,10 @@ func (p *Producer) Publish(object interface{}) error {
 
 func (p *Producer) Close() error {
 	if err := p.channel.Close(); err != nil {
-		return fmt.Errorf("failed to close channel: %s", err)
+		return fmt.Errorf("failed to close channel: %w", err)
 	}
 	if err := p.connection.Close(); err != nil {
-		return fmt.Errorf("failed to close connection: %s", err)
+		return fmt.Errorf("failed to close connection: %w", err)
 	}
 	return nil
 }

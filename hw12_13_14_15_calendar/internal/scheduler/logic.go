@@ -3,9 +3,10 @@ package scheduler
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/messages"
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage/model"
-	"time"
 )
 
 func (a *App) sendNotification(event *model.Event) error {

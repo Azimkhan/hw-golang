@@ -3,6 +3,7 @@ package amqp
 import (
 	"context"
 	"fmt"
+
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/conf"
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/logger"
 	"github.com/streadway/amqp"
@@ -33,7 +34,7 @@ func NewConsumer(logger *logger.Logger, config *conf.AMQPConfig, handler Consume
 
 	c.conn, c.channel, err = NewChannel(config)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create amqp channel: %s", err)
+		return nil, fmt.Errorf("failed to create amqp channel: %w", err)
 	}
 
 	logger.Info(fmt.Sprintf("declared Exchange, declaring Queue %q", config.Queue))
@@ -46,7 +47,7 @@ func NewConsumer(logger *logger.Logger, config *conf.AMQPConfig, handler Consume
 		nil,          // arguments
 	)
 	if err != nil {
-		return nil, fmt.Errorf("Queue Declare: %s", err)
+		return nil, fmt.Errorf("queue Declare: %w", err)
 	}
 
 	logger.Info(fmt.Sprintf("declared Queue (%q %d messages, %d consumers), binding to Exchange (key %q)",
@@ -59,7 +60,7 @@ func NewConsumer(logger *logger.Logger, config *conf.AMQPConfig, handler Consume
 		false,             // noWait
 		nil,               // arguments
 	); err != nil {
-		return nil, fmt.Errorf("queue Bind: %s", err)
+		return nil, fmt.Errorf("queue Bind: %w", err)
 	}
 	return c, nil
 }
@@ -75,7 +76,7 @@ func (c *Consumer) Consume(ctx context.Context) error {
 		nil,            // args
 	)
 	if err != nil {
-		return fmt.Errorf("queue Consume: %s", err)
+		return fmt.Errorf("queue Consume: %w", err)
 	}
 	c.logger.Info("start consuming")
 
@@ -94,17 +95,16 @@ func (c *Consumer) Consume(ctx context.Context) error {
 			if err = d.Ack(false); err != nil {
 				c.logger.Error(fmt.Sprintf("failed to acknowledge message: %s", err))
 			}
-
 		}
 	}
 }
 
 func (c *Consumer) Stop() error {
 	if err := c.channel.Cancel(c.tag, true); err != nil {
-		return fmt.Errorf("failed to cancel consumer: %s", err)
+		return fmt.Errorf("failed to cancel consumer: %w", err)
 	}
 	if err := c.conn.Close(); err != nil {
-		return fmt.Errorf("failed to close connection: %s", err)
+		return fmt.Errorf("failed to close connection: %w", err)
 	}
 	return nil
 }

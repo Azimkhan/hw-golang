@@ -4,10 +4,11 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/conf"
-	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/sender"
 	"os/signal"
 	"syscall"
+
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/conf"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/sender"
 )
 
 var configFile string
@@ -40,5 +41,4 @@ func main() {
 		fmt.Printf("failed to run app: %s", err)
 		return
 	}
-
 }

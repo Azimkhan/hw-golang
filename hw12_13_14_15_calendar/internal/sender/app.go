@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"time"
+
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/amqp"
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/conf"
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/logger"
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/messages"
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage"
-	"time"
 )
 
 type Logger interface {

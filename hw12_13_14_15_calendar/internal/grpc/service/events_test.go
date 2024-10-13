@@ -38,6 +38,7 @@ const (
 	testDBPassword = "postgres"
 	testDBImage    = "postgres:16"
 )
+const buffSize = 10 * 1024 * 1024
 
 func checkEvent(t *testing.T, event *pb.Event, row pgx.Row) {
 	t.Helper()
@@ -243,7 +244,7 @@ func createApp(ctx context.Context, t *testing.T) (*app.App, *sqlstorage.Storage
 
 func testServer(_ context.Context, t *testing.T, testApp *app.App) pb.EventServiceClient {
 	t.Helper()
-	lis := bufconn.Listen(101024 * 1024)
+	lis := bufconn.Listen(buffSize)
 	baseServer := grpc.NewServer()
 	pb.RegisterEventServiceServer(baseServer, NewEventsService(testApp))
 	go func() {

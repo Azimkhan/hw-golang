@@ -3,11 +3,12 @@ package scheduler
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/amqp"
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/conf"
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/logger"
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage"
-	"time"
 )
 
 type Logger interface {
@@ -27,6 +28,7 @@ func New(config *conf.SchedulerConfig) *App {
 		config: config,
 	}
 }
+
 func (a *App) Run(ctx context.Context) error {
 	// create logger
 	logg, err := logger.New(a.config.Logger.Level)
