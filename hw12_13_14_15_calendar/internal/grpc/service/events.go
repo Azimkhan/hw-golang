@@ -123,6 +123,6 @@ func (s *EventsService) internalToGrpc(e *model.Event) *pb.Event {
 		Start:       timestamppb.New(e.StartTime),
 		End:         timestamppb.New(e.EndTime),
 		UserId:      e.UserID,
-		NotifyDelta: uint32(e.NotifyDelta),
+		NotifyDelta: uint32(e.NotifyDelta), //nolint
 	}
 }
