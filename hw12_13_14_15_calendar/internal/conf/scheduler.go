@@ -3,10 +3,12 @@ package conf
 import "github.com/BurntSushi/toml"
 
 type SchedulerConfig struct {
-	ScanInterval int
-	Logger       LoggerConf
-	Storage      StorageConf
-	AMQP         AMQPConfig
+	CleanInterval      int
+	CleanThresholdDays int
+	ScanInterval       int
+	Logger             LoggerConf
+	Storage            StorageConf
+	AMQP               AMQPConfig
 }
 
 func NewSchedulerConfig() SchedulerConfig {

@@ -109,3 +109,17 @@ func (s *Storage) FilterEventsByMonth(_ context.Context, monthStart time.Time) (
 	}
 	return events, nil
 }
+
+func (s *Storage) DeleteEventsOlderThan(_ context.Context, threshold time.Time) (int64, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	var n int64
+	for id, event := range s.events {
+		if event.StartTime.Before(threshold) {
+			delete(s.events, id)
+			n++
+		}
+	}
+	return n, nil
+}

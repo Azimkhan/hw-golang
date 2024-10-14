@@ -70,14 +70,18 @@ func (a *App) Run(ctx context.Context) error {
 }
 
 func (a *App) runInternal(ctx context.Context) error {
-	ticker := time.NewTicker(time.Duration(a.config.ScanInterval) * time.Second)
-	defer ticker.Stop()
+	scheduleTicker := time.NewTicker(time.Duration(a.config.ScanInterval) * time.Second)
+	defer scheduleTicker.Stop()
+
+	cleanTicker := time.NewTicker(time.Duration(a.config.CleanInterval*0+5) * time.Second)
+	defer cleanTicker.Stop()
+
 	for {
 		select {
 		case <-ctx.Done():
 			return nil
-		case <-ticker.C:
-			a.logger.Info("scanning events")
+		case <-scheduleTicker.C:
+			a.logger.Info("scheduling events")
 			now := time.Now()
 
 			// filter events that belong to range now <= event.StartTime - event.NotifyDelay < now + ScanInterval
@@ -88,6 +92,10 @@ func (a *App) runInternal(ctx context.Context) error {
 				a.logger.Error(fmt.Sprintf("failed to scan events: %s", err))
 			} else {
 				a.logger.Info(fmt.Sprintf("sent %d notifications", n))
+			}
+		case <-cleanTicker.C:
+			if err := a.cleanOldEvents(ctx); err != nil {
+				a.logger.Error(fmt.Sprintf("failed to clean old events: %s", err))
 			}
 		}
 	}

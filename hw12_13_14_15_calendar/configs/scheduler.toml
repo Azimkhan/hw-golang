@@ -1,4 +1,6 @@
 scanInterval = 30
+cleanInterval = 3600
+cleanThresholdDays = 500
 
 [logger]
 level = "INFO"

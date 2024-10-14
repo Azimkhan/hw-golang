@@ -2,6 +2,7 @@ package sqlstorage
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage/model"
@@ -90,6 +91,15 @@ FROM events WHERE start_time >= $1 AND start_time <= $2`,
 	}
 	defer rows.Close()
 	return s.fetchRows(rows)
+}
+
+func (s *Storage) DeleteEventsOlderThan(ctx context.Context, threshold time.Time) (int64, error) {
+	query := `DELETE FROM events WHERE start_time < $1`
+	result, err := s.Conn.Exec(ctx, query, threshold)
+	if err != nil {
+		return 0, fmt.Errorf("failed to delete old events: %w", err)
+	}
+	return result.RowsAffected(), nil
 }
 
 func (s *Storage) FilterEventsByMonth(ctx context.Context, monthStart time.Time) ([]*model.Event, error) {
