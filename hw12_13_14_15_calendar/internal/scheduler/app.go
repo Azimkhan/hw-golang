@@ -73,7 +73,7 @@ func (a *App) runInternal(ctx context.Context) error {
 	scheduleTicker := time.NewTicker(time.Duration(a.config.ScanInterval) * time.Second)
 	defer scheduleTicker.Stop()
 
-	cleanTicker := time.NewTicker(time.Duration(a.config.CleanInterval*0+5) * time.Second)
+	cleanTicker := time.NewTicker(time.Duration(a.config.CleanInterval) * time.Second)
 	defer cleanTicker.Stop()
 
 	for {

@@ -100,11 +100,15 @@ func (c *Consumer) Consume(ctx context.Context) error {
 }
 
 func (c *Consumer) Stop() error {
-	if err := c.channel.Cancel(c.tag, true); err != nil {
-		return fmt.Errorf("failed to cancel consumer: %w", err)
+	if c.channel != nil {
+		if err := c.channel.Cancel(c.tag, true); err != nil {
+			return fmt.Errorf("failed to cancel consumer: %w", err)
+		}
 	}
-	if err := c.conn.Close(); err != nil {
-		return fmt.Errorf("failed to close connection: %w", err)
+	if c.conn != nil {
+		if err := c.conn.Close(); err != nil {
+			return fmt.Errorf("failed to close connection: %w", err)
+		}
 	}
 	return nil
 }

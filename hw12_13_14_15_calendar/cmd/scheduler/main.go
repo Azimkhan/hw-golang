@@ -37,7 +37,6 @@ func main() {
 			fmt.Printf("failed to stop app: %s", err)
 		}
 	}()
-	defer cancel()
 	if err := app.Run(ctx); err != nil {
 		fmt.Printf("failed to run app: %s", err)
 		return

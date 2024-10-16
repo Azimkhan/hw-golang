@@ -48,11 +48,15 @@ func (p *Producer) Publish(object interface{}) error {
 }
 
 func (p *Producer) Close() error {
-	if err := p.channel.Close(); err != nil {
-		return fmt.Errorf("failed to close channel: %w", err)
+	if p.channel != nil {
+		if err := p.channel.Close(); err != nil {
+			return fmt.Errorf("failed to close channel: %w", err)
+		}
 	}
-	if err := p.connection.Close(); err != nil {
-		return fmt.Errorf("failed to close connection: %w", err)
+	if p.connection != nil {
+		if err := p.connection.Close(); err != nil {
+			return fmt.Errorf("failed to close connection: %w", err)
+		}
 	}
 	return nil
 }
