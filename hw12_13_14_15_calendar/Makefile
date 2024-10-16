@@ -6,6 +6,10 @@ LDFLAGS := -X main.release="develop" -X main.buildDate=$(shell date -u +%Y-%m-%d
 
 build:
 	go build -v -o $(BIN) -ldflags "$(LDFLAGS)" ./cmd/calendar
+	go build -v -o $(BIN)_scheduler -ldflags "$(LDFLAGS)" ./cmd/scheduler
+	go build -v -o $(BIN)_sender -ldflags "$(LDFLAGS)" ./cmd/sender
+	go build -v -o $(BIN)_tools -ldflags "$(LDFLAGS)" ./cmd/cli-tools
+
 
 run: build
 	$(BIN) -config ./configs/config.toml
@@ -26,10 +30,10 @@ test:
 	go test -race ./internal/... ./pkg/...
 
 install-lint-deps:
-	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.57.2
+	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.61.0
 
 lint: install-lint-deps
-	golangci-lint run ./...
+	golangci-lint -v run ./...
 
 migrate: build
 	$(BIN) migrate

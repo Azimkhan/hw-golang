@@ -7,11 +7,19 @@ import (
 // При желании конфигурацию можно вынести в internal/config.
 // Организация конфига в main принуждает нас сужать API компонентов, использовать
 // при их конструировании только необходимые параметры, а также уменьшает вероятность циклической зависимости.
-type Config struct {
+type APIConfig struct {
 	Logger  LoggerConf
 	HTTP    HTTPConf
 	GRPC    GRPCConf
 	Storage StorageConf
+}
+
+type AMQPConfig struct {
+	URI          string
+	Exchange     string
+	ExchangeType string
+	RoutingKey   string
+	Queue        string
 }
 
 type StorageConf struct {
@@ -32,11 +40,11 @@ type LoggerConf struct {
 	// TODO
 }
 
-func NewConfig() Config {
-	return Config{}
+func NewConfig() APIConfig {
+	return APIConfig{}
 }
 
-func (c *Config) LoadFromFile(path string) error {
+func (c *APIConfig) LoadFromFile(path string) error {
 	_, err := toml.DecodeFile(path, c)
 	return err
 }

@@ -20,6 +20,7 @@ type Storage interface {
 	FilterEventsByDay(ctx context.Context, date time.Time) ([]*model.Event, error)
 	FilterEventsByWeek(ctx context.Context, weekStart time.Time) ([]*model.Event, error)
 	FilterEventsByMonth(ctx context.Context, monthStart time.Time) ([]*model.Event, error)
+	DeleteEventsOlderThan(ctx context.Context, threshold time.Time) (int64, error)
 }
 
 func NewFromConfig(conf *conf.StorageConf) (Storage, func(ctx context.Context) error, error) {
