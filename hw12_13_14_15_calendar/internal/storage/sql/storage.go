@@ -9,6 +9,19 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+const (
+	insertQuery = `
+INSERT INTO events (id, title, start_time, end_time, user_id, notify_delta, notification_sent) 
+VALUES ($1, $2, $3, $4, $5, $6, $7)`
+	updateQuery = `
+UPDATE events SET title = $1, start_time = $2, end_time = $3, user_id = $4, notify_delta = $5
+WHERE id = $6`
+	deleteQuery = "DELETE FROM events WHERE id = $1"
+	selectQuery = `
+SELECT id, title, start_time, end_time, user_id, notify_delta, notification_sent
+FROM events WHERE start_time >= $1 AND start_time <= $2`
+)
+
 func New(dsn string) *Storage {
 	return &Storage{
 		dsn: dsn,
@@ -22,19 +35,14 @@ type Storage struct {
 
 func (s *Storage) CreateEvent(ctx context.Context, event *model.Event) error {
 	_, err := s.Conn.Exec(ctx,
-		`
-INSERT INTO events (id, title, start_time, end_time, user_id, notify_delta) 
-VALUES ($1, $2, $3, $4, $5, $6)`,
-		event.ID, event.Title, event.StartTime, event.EndTime, event.UserID, event.NotifyDelta)
+		insertQuery,
+		event.ID, event.Title, event.StartTime, event.EndTime, event.UserID, event.NotifyDelta, false)
 	return err
 }
 
 func (s *Storage) UpdateEvent(ctx context.Context, event *model.Event) error {
-	// write an implementation for updating an event:
 	res, err := s.Conn.Exec(ctx,
-		`
-UPDATE events SET title = $1, start_time = $2, end_time = $3, user_id = $4, notify_delta = $5 
-WHERE id = $6`,
+		updateQuery,
 		event.Title, event.StartTime, event.EndTime, event.UserID, event.NotifyDelta, event.ID)
 	if err != nil {
 		return err
@@ -47,7 +55,7 @@ WHERE id = $6`,
 
 func (s *Storage) RemoveEvent(ctx context.Context, eventID string) error {
 	res, err := s.Conn.Exec(ctx,
-		"DELETE FROM events WHERE id = $1",
+		deleteQuery,
 		eventID)
 	if err != nil {
 		return err
@@ -61,10 +69,9 @@ func (s *Storage) RemoveEvent(ctx context.Context, eventID string) error {
 func (s *Storage) FilterEventsByDay(ctx context.Context, date time.Time) ([]*model.Event, error) {
 	beginningOfDay := time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, time.Local)
 	endOfDay := time.Date(date.Year(), date.Month(), date.Day(), 23, 59, 59, 0, time.Local)
+
 	rows, err := s.Conn.Query(ctx,
-		`
-SELECT id, title, start_time, end_time, user_id, notify_delta 
-FROM events WHERE start_time >= $1 AND start_time <= $2`,
+		selectQuery,
 		beginningOfDay, endOfDay)
 	if err != nil {
 		return nil, err
@@ -82,9 +89,7 @@ func (s *Storage) FilterEventsByWeek(ctx context.Context, weekStart time.Time) (
 	endOfWeek = time.Date(endOfWeek.Year(), endOfWeek.Month(), endOfWeek.Day(), 23, 59, 59, 0, time.Local)
 
 	rows, err := s.Conn.Query(ctx,
-		`
-SELECT id, title, start_time, end_time, user_id, notify_delta 
-FROM events WHERE start_time >= $1 AND start_time <= $2`,
+		selectQuery,
 		beginningOfWeek, endOfWeek)
 	if err != nil {
 		return nil, err
@@ -111,9 +116,7 @@ func (s *Storage) FilterEventsByMonth(ctx context.Context, monthStart time.Time)
 	endOfMonth = time.Date(endOfMonth.Year(), endOfMonth.Month(), endOfMonth.Day(), 23, 59, 59, 0, time.Local)
 
 	rows, err := s.Conn.Query(ctx,
-		`
-SELECT id, title, start_time, end_time, user_id, notify_delta 
-FROM events WHERE start_time >= $1 AND start_time <= $2`,
+		selectQuery,
 		beginningOfMonth, endOfMonth)
 	if err != nil {
 		return nil, err
@@ -130,7 +133,15 @@ func (s *Storage) fetchRows(rows pgx.Rows) ([]*model.Event, error) {
 	var err error
 	for rows.Next() {
 		event := &model.Event{}
-		err = rows.Scan(&event.ID, &event.Title, &event.StartTime, &event.EndTime, &event.UserID, &event.NotifyDelta)
+		err = rows.Scan(
+			&event.ID,
+			&event.Title,
+			&event.StartTime,
+			&event.EndTime,
+			&event.UserID,
+			&event.NotifyDelta,
+			&event.NotificationSent,
+		)
 		if err != nil {
 			return nil, err
 		}
@@ -159,6 +170,21 @@ func (s *Storage) Close(ctx context.Context) error {
 			return err
 		}
 		s.Conn = nil
+	}
+	return nil
+}
+
+func (s *Storage) MarkNotificationSent(ctx context.Context, eventID string) error {
+	res, err := s.Conn.Exec(ctx,
+		`
+UPDATE events SET notification_sent = true 
+WHERE id = $1 AND notification_sent = false`,
+		eventID)
+	if err != nil {
+		return err
+	}
+	if res.RowsAffected() == 0 {
+		return model.ErrEventAlreadyNotified
 	}
 	return nil
 }

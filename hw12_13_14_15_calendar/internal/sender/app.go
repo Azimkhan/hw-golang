@@ -3,6 +3,7 @@ package sender
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/logger"
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/messages"
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage"
+	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/storage/model"
 )
 
 type Logger interface {
@@ -72,6 +74,21 @@ func (a *App) handleNotification(msg []byte) error {
 		return fmt.Errorf("failed to unmarshal message: %w", err)
 	}
 	a.logger.Info(fmt.Sprintf("received notification: %v", notification))
+
+	// Mark the event as notified
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err := a.storage.MarkNotificationSent(ctx, notification.EventID)
+	if err != nil {
+		if errors.Is(err, model.ErrEventAlreadyNotified) {
+			a.logger.Info(fmt.Sprintf("event %s already notified", notification.EventID))
+			return nil
+		}
+		return fmt.Errorf("failed to mark event as notified: %w", err)
+	}
+
+	a.logger.Info(fmt.Sprintf("marked event %s as notified", notification.EventID))
 	return nil
 }
 

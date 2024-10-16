@@ -11,6 +11,7 @@ import (
 
 func (a *App) sendNotification(event *model.Event) error {
 	notification := messages.Notification{
+		EventID:   event.ID,
 		Title:     event.Title,
 		UserID:    event.UserID,
 		StartTime: event.StartTime,
