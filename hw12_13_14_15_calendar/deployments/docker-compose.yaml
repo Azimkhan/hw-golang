@@ -1,1 +1,80 @@
-version: "3"
+name: calendar
+services:
+  migrator:
+    image: calendar:latest
+    build: ..
+    command: "/app/calendar_tools migrate"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./configs/config.toml:/etc/calendar/config.toml
+
+  api:
+    image: calendar:latest
+    build: ..
+    command: "/app/calendar"
+    ports:
+      - "18081:18081"
+      - "50051:50051"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    volumes:
+      - ./configs/config.toml:/etc/calendar/config.toml
+
+  sender:
+    image: calendar:latest
+    build: ..
+    command: "/app/calendar_sender"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    volumes:
+      - ./configs/sender.toml:/etc/calendar/sender_config.toml
+
+  scheduler:
+    image: calendar:latest
+    build: ..
+    command: "/app/calendar_scheduler"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    volumes:
+      - ./configs/scheduler.toml:/etc/calendar/scheduler_config.toml
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: calendar
+      POSTGRES_PASSWORD: calendar
+      POSTGRES_DB: calendar
+
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U calendar -d calendar"]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+    ports:
+      - "35432:5432"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q status"]
+      interval: 2s
+      timeout: 5s
+      retries: 10

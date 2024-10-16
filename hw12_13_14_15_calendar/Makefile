@@ -46,4 +46,14 @@ generate:
 		--grpc-gateway_out=gen/events/pb \
 		api/events/*.proto
 
-.PHONY: build run build-img run-img version test lint
+
+up-build:
+	docker compose -f deployments/docker-compose.yaml up -d --build
+
+up:
+	docker compose -f deployments/docker-compose.yaml up -d
+
+down:
+	docker compose -f deployments/docker-compose.yaml down
+
+.PHONY: build run build-img run-img version test lint up up-build down

@@ -1,0 +1,16 @@
+scanInterval = 30
+cleanInterval = 3600
+cleanThresholdDays = 500
+
+[logger]
+level = "INFO"
+
+[storage]
+type = "sql"
+dsn = "postgres://calendar:calendar@postgres:5432/calendar?sslmode=disable"
+
+[amqp]
+uri = "amqp://guest:guest@rabbitmq:5672/"
+exchange = "calendar"
+exchangeType = "direct"
+routingKey = "notifications"

@@ -1,4 +1,4 @@
-name: calendar
+name: calendar-local
 services:
     postgres:
         image: postgres:16
