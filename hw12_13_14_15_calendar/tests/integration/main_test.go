@@ -233,7 +233,7 @@ func (suite *MainTestSuite) TestNotificationIsSent() {
 	sched := scheduler.New(&conf.SchedulerConfig{
 		CleanInterval:      1800,
 		CleanThresholdDays: 180,
-		ScanInterval:       2,
+		ScanInterval:       1,
 		Logger: conf.LoggerConf{
 			Level: "DEBUG",
 		},
@@ -256,10 +256,10 @@ func (suite *MainTestSuite) TestNotificationIsSent() {
 		Event: &pb.Event{
 			Id:          "1",
 			Title:       "test",
-			Start:       timestamppb.New(time.Now().Add(5 * time.Second)),
+			Start:       timestamppb.New(time.Now().Add(3 * time.Second)),
 			End:         timestamppb.New(time.Now()),
 			UserId:      "1",
-			NotifyDelta: 0,
+			NotifyDelta: 1,
 		},
 	})
 	// Ensure the event is created
