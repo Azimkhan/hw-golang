@@ -11,7 +11,7 @@ services:
         condition: service_healthy
       rabbitmq:
         condition: service_healthy
-    command: go test -v ./tests/... -count=1
+    command: go test --tags integration -v ./tests/... -count=1
 
   postgres:
     image: postgres:16
