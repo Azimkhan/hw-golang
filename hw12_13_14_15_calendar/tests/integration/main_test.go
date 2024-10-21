@@ -295,6 +295,8 @@ func (suite *MainTestSuite) TestNotificationIsSent() {
 	require.Equal(suite.T(), "1", notification.UserID)
 }
 
+// TestNotificationIsConsumed tests that the notification is consumed
+// when the event is sent to the sender.
 func (suite *MainTestSuite) TestNotificationIsConsumed() {
 	application := sender.New(&conf.SenderConfig{
 		Logger: conf.LoggerConf{
