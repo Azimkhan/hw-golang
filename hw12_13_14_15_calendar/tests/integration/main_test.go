@@ -1,10 +1,12 @@
 package integration
 
-// Basic imports
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/gen/events/pb"
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/app"
 	"github.com/Azimkhan/hw-golang/hw12_13_14_15_calendar/internal/conf"
@@ -22,15 +24,15 @@ import (
 	grpc2 "google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/types/known/timestamppb"
-	"testing"
-	"time"
 )
 
 const dsn = "host=postgres user=calendar_test password=calendar_test dbname=calendar_test sslmode=disable"
 
-const notificationTestQueue = "notificationTester"
-const amqpURI = "amqp://guest:guest@rabbitmq:5672/"
-const grpcAddr = "localhost:50051"
+const (
+	notificationTestQueue = "notificationTester"
+	amqpURI               = "amqp://guest:guest@rabbitmq:5672/"
+	grpcAddr              = "localhost:50051"
+)
 
 var amqpConfig = conf.AMQPConfig{
 	URI:          amqpURI,
@@ -45,21 +47,16 @@ var storageConf = conf.StorageConf{
 	DSN:  dsn,
 }
 
-// Define the suite, and absorb the built-in basic suite
-// functionality from testify - including a T() method which
-// returns the current testing context
 type MainTestSuite struct {
 	suite.Suite
 	s          *sqlstorage.Storage
 	pgConn     *pgx.Conn
-	tx         pgx.Tx
 	amqpConn   *amqp.Connection
 	amqpCh     *amqp.Channel
 	grpcServer *grpc.Server
 }
 
 func (suite *MainTestSuite) SetupSuite() {
-
 	suite.setupPostgres()
 
 	// AMQP connection
@@ -77,7 +74,6 @@ func (suite *MainTestSuite) SetupSuite() {
 		require.NoError(suite.T(), grpcServer.Serve())
 	}()
 	suite.grpcServer = grpcServer
-
 }
 
 func (suite *MainTestSuite) createApp() *app.App {
@@ -99,7 +95,6 @@ func (suite *MainTestSuite) setupAMQP() {
 	require.NoError(suite.T(), err)
 	suite.amqpConn = conn
 	suite.amqpCh = ch
-
 }
 
 func (suite *MainTestSuite) declareExchange() {
@@ -158,7 +153,6 @@ func (suite *MainTestSuite) TearDownSuite() {
 	}
 }
 
-// before each test
 func (suite *MainTestSuite) SetupTest() {
 	// Redeclare exchange
 	_ = suite.amqpCh.ExchangeDelete(amqpConfig.Exchange, false, false)
@@ -174,7 +168,6 @@ func (suite *MainTestSuite) SetupTest() {
 	if err := suite.s.Migrate(context.Background(), nil); err != nil {
 		suite.T().Fatal(err)
 	}
-
 }
 
 func (suite *MainTestSuite) startConsumingNotifications() (<-chan *messages.Notification, error) {
@@ -213,12 +206,14 @@ func (suite *MainTestSuite) startConsumingNotifications() (<-chan *messages.Noti
 			nil,
 		)
 		if err != nil {
-			suite.T().Fatal(err)
+			suite.T().Log("Failed to consume messages", err)
+			return
 		}
 		for msgBytes := range msgs {
 			var notification messages.Notification
 			if err := json.Unmarshal(msgBytes.Body, &notification); err != nil {
-				suite.T().Fatal(err)
+				suite.T().Log("Failed to unmarshal message", err)
+				continue
 			}
 			successChan <- &notification
 			return
@@ -227,7 +222,8 @@ func (suite *MainTestSuite) startConsumingNotifications() (<-chan *messages.Noti
 	return successChan, nil
 }
 
-// == Test cases ==
+// TestNotificationIsSent tests that the notification is sent
+// when new event is created.
 func (suite *MainTestSuite) TestNotificationIsSent() {
 	// Start consuming notifications
 	successChan, err := suite.startConsumingNotifications()
@@ -297,7 +293,6 @@ func (suite *MainTestSuite) TestNotificationIsSent() {
 	require.Equal(suite.T(), "1", notification.EventID)
 	require.Equal(suite.T(), "test", notification.Title)
 	require.Equal(suite.T(), "1", notification.UserID)
-
 }
 
 func (suite *MainTestSuite) TestNotificationIsConsumed() {
@@ -317,11 +312,12 @@ func (suite *MainTestSuite) TestNotificationIsConsumed() {
 	}()
 
 	// create event
-	eventId := "2"
+	eventID := "2"
 	_, err := suite.pgConn.Exec(
 		context.Background(),
-		"INSERT INTO events (id, title, start_time, end_time, user_id, notify_delta, notification_sent) VALUES ($1, $2, $3, $4, $5, $6, $7)",
-		eventId, "Meeting", time.Now(), time.Now(), "3", 0, false,
+		"INSERT INTO events (id, title, start_time, end_time, user_id, notify_delta, notification_sent) "+
+			"VALUES ($1, $2, $3, $4, $5, $6, $7)",
+		eventID, "Meeting", time.Now(), time.Now(), "3", 0, false,
 	)
 	require.NoError(suite.T(), err)
 	err = suite.amqpCh.Publish(
@@ -346,7 +342,11 @@ func (suite *MainTestSuite) TestNotificationIsConsumed() {
 		case <-ctx.Done():
 			require.Fail(suite.T(), "Notification read timeout")
 		case <-ticker.C:
-			result := suite.pgConn.QueryRow(context.Background(), "SELECT notification_sent FROM events WHERE id = $1", eventId)
+			result := suite.pgConn.QueryRow(
+				context.Background(),
+				"SELECT notification_sent FROM events WHERE id = $1",
+				eventID,
+			)
 			var notificationSent bool
 			require.NoError(suite.T(), result.Scan(&notificationSent))
 			if notificationSent {
@@ -354,11 +354,8 @@ func (suite *MainTestSuite) TestNotificationIsConsumed() {
 			}
 		}
 	}
-
 }
 
-// In order for 'go test' to run this suite, we need to create
-// a normal test function and pass our suite to suite.Run
 func TestExampleTestSuite(t *testing.T) {
 	suite.Run(t, new(MainTestSuite))
 }
