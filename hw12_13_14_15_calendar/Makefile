@@ -56,4 +56,7 @@ up:
 down:
 	docker compose -f deployments/docker-compose.yaml down
 
-.PHONY: build run build-img run-img version test lint up up-build down
+integration-tests:
+	docker compose -f deployments/integration-tests.yaml up integration_tests
+
+.PHONY: build run build-img run-img version test lint up up-build down integration-tests

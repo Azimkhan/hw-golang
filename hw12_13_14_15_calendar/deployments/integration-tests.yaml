@@ -1,0 +1,35 @@
+name: calendar-tests
+services:
+  integration_tests:
+    build:
+      context: ..
+      dockerfile: Dockerfile_tests
+    volumes:
+      - ..:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    command: go test -v ./tests/... -count=1
+
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: calendar_test
+      POSTGRES_PASSWORD: calendar_test
+      POSTGRES_DB: calendar_test
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U calendar_test -d calendar_test" ]
+      interval: 2s
+      timeout: 5s
+      retries: 10
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    healthcheck:
+      test: [ "CMD-SHELL", "rabbitmq-diagnostics -q status" ]
+      interval: 2s
+      timeout: 5s
+      retries: 10

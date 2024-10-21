@@ -1,0 +1,4 @@
+FROM golang:1.22
+
+# Set the working directory
+WORKDIR /app
