@@ -1,11 +1,10 @@
-//go:build integration
-
 package integration
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
 	"time"
 
@@ -250,10 +249,7 @@ func (suite *MainTestSuite) TestNotificationIsSent() {
 		require.NoError(suite.T(), sched.Stop())
 	}()
 	// Send gRPC request
-	grpcClient, err := grpc2.NewClient(grpcAddr, grpc2.WithTransportCredentials(insecure.NewCredentials()))
-	require.NoError(suite.T(), err)
-	pb.NewEventServiceClient(grpcClient)
-	client := pb.NewEventServiceClient(grpcClient)
+	client := suite.createGRPCClient()
 	response, err := client.CreateEvent(context.Background(), &pb.CreateEventRequest{
 		Event: &pb.Event{
 			Id:          "1",
@@ -295,6 +291,13 @@ func (suite *MainTestSuite) TestNotificationIsSent() {
 	require.Equal(suite.T(), "1", notification.EventID)
 	require.Equal(suite.T(), "test", notification.Title)
 	require.Equal(suite.T(), "1", notification.UserID)
+}
+
+func (suite *MainTestSuite) createGRPCClient() pb.EventServiceClient {
+	grpcClient, err := grpc2.NewClient(grpcAddr, grpc2.WithTransportCredentials(insecure.NewCredentials()))
+	require.NoError(suite.T(), err)
+	client := pb.NewEventServiceClient(grpcClient)
+	return client
 }
 
 // TestNotificationIsConsumed tests that the notification is consumed
@@ -360,6 +363,90 @@ func (suite *MainTestSuite) TestNotificationIsConsumed() {
 	}
 }
 
-func TestExampleTestSuite(t *testing.T) {
+// TestEventFiltering tests that events are filtered correctly by day, week, and month.
+func (suite *MainTestSuite) TestEventFiltering() {
+	// table test
+	testData := []struct {
+		name        string
+		fixtureFile string
+		expectedID  []string
+		date        time.Time
+		filter      func(context.Context, pb.EventServiceClient, time.Time) ([]*pb.Event, error)
+	}{
+		{
+			name:        "day",
+			fixtureFile: "../fixtures/events_day.sql",
+			expectedID:  []string{"event1", "event2"},
+			date:        time.Date(2024, 10, 13, 0, 0, 0, 0, time.UTC),
+			filter: func(ctx context.Context, client pb.EventServiceClient, date time.Time) ([]*pb.Event, error) {
+				response, err := client.FilterEventsByDay(ctx, &pb.FilterEventsByDayRequest{
+					Date: timestamppb.New(date),
+				})
+				if err != nil {
+					return nil, err
+				}
+				return response.Events, nil
+			},
+		},
+		{
+			name:        "week",
+			fixtureFile: "../fixtures/events_week.sql",
+			expectedID:  []string{"event77", "event81"},
+			date:        time.Date(2024, 10, 7, 0, 0, 0, 0, time.UTC),
+			filter: func(ctx context.Context, client pb.EventServiceClient, date time.Time) ([]*pb.Event, error) {
+				response, err := client.FilterEventsByWeek(ctx, &pb.FilterEventsByWeekRequest{
+					Date: timestamppb.New(date),
+				})
+				if err != nil {
+					return nil, err
+				}
+				return response.Events, nil
+			},
+		},
+		{
+			name:        "month",
+			fixtureFile: "../fixtures/events_month.sql",
+			expectedID:  []string{"event101", "event107"},
+			date:        time.Date(2024, 10, 1, 0, 0, 0, 0, time.UTC),
+			filter: func(ctx context.Context, client pb.EventServiceClient, date time.Time) ([]*pb.Event, error) {
+				response, err := client.FilterEventsByMonth(ctx, &pb.FilterEventsByMonthRequest{
+					Date: timestamppb.New(date),
+				})
+				if err != nil {
+					return nil, err
+				}
+				return response.Events, nil
+			},
+		},
+	}
+
+	client := suite.createGRPCClient()
+	for _, data := range testData {
+		suite.SetupTest()
+		suite.T().Run(data.name, func(t *testing.T) {
+			// Load fixtures
+			query, err := os.ReadFile(data.fixtureFile)
+			require.NoError(t, err)
+			_, err = suite.pgConn.Exec(context.Background(), string(query))
+			require.NoError(t, err)
+
+			// Filter events
+			events, err := data.filter(context.Background(), client, data.date)
+			require.NoError(t, err)
+
+			// Check the number of events
+			require.Len(t, events, len(data.expectedID))
+			// collect IDs
+			var ids []string
+			for _, event := range events {
+				ids = append(ids, event.Id)
+			}
+			// compare IDs
+			require.ElementsMatch(t, data.expectedID, ids)
+		})
+	}
+}
+
+func TestMainTestSuite(t *testing.T) {
 	suite.Run(t, new(MainTestSuite))
 }
