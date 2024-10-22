@@ -123,3 +123,13 @@ func (s *Storage) DeleteEventsOlderThan(_ context.Context, threshold time.Time) 
 	}
 	return n, nil
 }
+
+func (s *Storage) MarkNotificationSent(_ context.Context, eventID string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, ok := s.events[eventID]; !ok {
+		return model.ErrEventNotFound
+	}
+	s.events[eventID].NotificationSent = true
+	return nil
+}

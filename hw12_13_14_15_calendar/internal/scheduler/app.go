@@ -102,8 +102,10 @@ func (a *App) runInternal(ctx context.Context) error {
 }
 
 func (a *App) Stop() error {
-	if err := a.producer.Close(); err != nil {
-		return fmt.Errorf("failed to close producer: %w", err)
+	if a.producer != nil {
+		if err := a.producer.Close(); err != nil {
+			return fmt.Errorf("failed to close producer: %w", err)
+		}
 	}
 	return nil
 }

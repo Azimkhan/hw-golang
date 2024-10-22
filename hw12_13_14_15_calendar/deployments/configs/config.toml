@@ -1,0 +1,12 @@
+[logger]
+level = "INFO"
+
+[grpc]
+bindAddr = ":50051"
+
+[http]
+bindAddr = ":18081"
+
+[storage]
+type = "sql"
+dsn = "postgres://calendar:calendar@postgres:5432/calendar?sslmode=disable"

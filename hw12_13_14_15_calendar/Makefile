@@ -46,4 +46,25 @@ generate:
 		--grpc-gateway_out=gen/events/pb \
 		api/events/*.proto
 
-.PHONY: build run build-img run-img version test lint
+
+up-build:
+	docker compose -f deployments/docker-compose.yaml up -d --build
+
+up:
+	docker compose -f deployments/docker-compose.yaml up -d
+
+down:
+	docker compose -f deployments/docker-compose.yaml down
+
+integration-tests:
+	@if docker compose -f deployments/integration-tests.yaml up --exit-code-from integration_tests; then \
+  		echo "Integration tests passed"; \
+  		docker compose -f deployments/integration-tests.yaml down; \
+  		exit 0; \
+	else \
+		echo "Integration tests failed"; \
+		docker compose -f deployments/integration-tests.yaml down; \
+		exit 1; \
+	fi
+
+.PHONY: build run build-img run-img version test lint up up-build down integration-tests
